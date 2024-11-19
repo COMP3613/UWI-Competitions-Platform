@@ -1,62 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">-->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
   </head>
 
-  <body>
-    
-    <nav class="black">
-      <div class="nav-wrapper">
-        <a style="font-family: copperplate;" href="#!" class="brand-logo center">{% block page %}{% endblock %}</a>
-        <div class="nav-wrapper">
-            <ul id="nav-mobile" class="left" style="font-family: lucida bright;">
-                <li><a href="/leaderboard">Leaderboard</a></li>
-                <li><a href="/competitions">Competitions</a></li>
-            </ul>
-            <ul id="nav-mobile" class="right" style="font-family: lucida bright;">
-              {% if user.is_authenticated %}
-                <li><a href="/logout">Log Out</a></li>
-                <li><a href="/profile">Profile</a></li>
-              {% else %}
-                <li><a href="/signup">Sign Up</a></li>
-                <li><a href="/login">Log In</a></li>
-              {% endif %}
-            </ul>
+  <body class="">
+    <div
+      class="nav-large items-center py-6 border-b-2 border-black text-[#93DEFF] flex-row"
+    >
+      <div class="links lg:px-[8vw]">
+        <div class="hidden md:flex justify-between">
+          <div class="flex font-medium items-center space-x-16">
+            <a href="/" class="text-4xl font-bold">UWI Competitions Platform</a>
+            <div class="p-2 bg-[#323643] rounded-md">Leaderboard</div>
+            <div class="p-2 bg-[#323643] rounded-md">Competitions</div>
+          </div>
+          <div class="flex space-x-6">
+            {% if user.is_authenticated %}
+            <img
+              src="https://i.pinimg.com/originals/c5/46/0e/c5460e3896ab18c0bf2910ca15e2f576.jpg"
+              alt=""
+              class="h-[64px] w-[64px] align-middle rounded-full"
+            />
+            {% else %}
+            <div><a href="/signup">Sign Up</a></div>
+            <div><a href="/login">Log In</a></div>
+            {% endif %}
+          </div>
         </div>
       </div>
-    </nav>
-    <!--
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        {% if category == 'error' %}
-        <div style="background-color: black; color: white;" class="alert">
-          <span class="closebtn">
-            {{ message }}
-            <button type="button" class="close" oncick="closeMessage()">X</button>
-          </span>
-        </div>
-        {% else %}
-        <div class="alert alert-success alter-dismissable fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-    {% endwith %}
-    -->
+    </div>
+
     {% block content %}{% endblock %}
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="{{url_for('static', filename='main.js')}}"></script>
   </body>
