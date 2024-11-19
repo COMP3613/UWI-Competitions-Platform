@@ -6,7 +6,7 @@ class RankingObserver(db.Model):
     __tablename__ = 'ranking_observer'
     
     id = db.Column(db.Integer, primary_key=True)
-    competition_id = db.Column(db.Integer, db.ForeignKey('competition.id'), nullable=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competition.id', use_alter=True, name='fk_competition'), nullable=False)
     observers = db.relationship('Student', secondary='observer_student', lazy='dynamic', backref=db.backref('ranking_observers', lazy=True))
     
     def __init__(self):

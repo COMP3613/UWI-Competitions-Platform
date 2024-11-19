@@ -18,8 +18,9 @@ class Competition(db.Model):
     teams = db.relationship('Team', secondary="competition_team", overlaps='competitions', lazy=True)
 
     observer_id = db.Column(db.Integer, db.ForeignKey('ranking_observer.id'))
-    observer = db.relationship('RankingObsever', backref = 'competition', uselist=False)
-
+    observers = db.relationship('RankingObserver',
+                              foreign_keys='RankingObserver.competition_id',
+                              backref=db.backref('competition', lazy=True))
 
     def __init__(self, name, date, location, level, max_score):
         self.name = name
@@ -29,7 +30,7 @@ class Competition(db.Model):
         self.max_score = max_score
         self.moderators = []
         self.teams = []
-        self.observer = RankingObserver()
+        self.observers = []
     
     def add_mod(self, mod):
         for m in self.moderators:
@@ -93,7 +94,7 @@ class Competition(db.Model):
                 rating_score = (score / self.max_score) * self.level * 100
                 
                 # Attach student to observer if not already attached
-                self.observer.attach(student)
+                self.observers.attach(student)
                 
                 # Update student's rating
                 student.update_aggregate_ranking(rating_score)
@@ -123,10 +124,10 @@ class Competition(db.Model):
             
             # Make sure all participating students are attached to observer
             for student in participating_students:
-                self.observer.attach(student)
+                self.observers.attach(student)
             
             # Update rankings through observer
-            self.observer.update_ranking(self)
+            self.observers.update_ranking(self)
             
             # Mark competition as confirmed
             self.confirm = True
@@ -143,8 +144,8 @@ class Competition(db.Model):
     
     def notify_observer(self):
         try:
-            if self.observer:
-                self.observer.notify()
+            if self.observers:
+                self.observers.notify()
                 return True
             return False
             
