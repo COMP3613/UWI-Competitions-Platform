@@ -1,7 +1,10 @@
 from App.database import db
 from App.models import User
+from App.models.observer import Observer
+from App.models.ranking_caretaker import RankingCaretaker
+from App.models.ranking_originator import RankingOriginator
 
-class Student(User):
+class Student(User, Observer):
     __tablename__ = 'student'
 
     rating_score = db.Column(db.Float, nullable=False, default=0)
@@ -10,6 +13,10 @@ class Student(User):
     prev_rank = db.Column(db.Integer, nullable=False, default=0)
     teams = db.relationship('Team', secondary='student_team', overlaps='students', lazy=True)
     notifications = db.relationship('Notification', backref='student', lazy=True)
+    competitions = db.relationship('Competition', secondary='competition_observer', back_populates='observers')
+
+    originator = RankingOriginator()
+    caretaker = RankingCaretaker()
 
     def __init__(self, username, password):
         super().__init__(username, password)
@@ -45,9 +52,19 @@ class Student(User):
             "ID": self.id,
             "Username": self.username,
             "Rating Score": self.rating_score,
-            "Number of Competitions" : comp_count,
+            "Number of Competitions" : self.comp_count,
             "Rank" : self.curr_rank
         }
 
     def __repr__(self):
         return f'<Student {self.id} : {self.username}>'
+
+    def update_rankings(self):
+       self.caretaker.save_memento(self.originator.create_memento())
+       print(f"Updating rankings for {self.username}...")
+
+# Define the association table
+competition_observer = db.Table('competition_observer',
+    db.Column('competition_id', db.Integer, db.ForeignKey('competition.id')),
+    db.Column('student_id', db.Integer, db.ForeignKey('student.id'))
+)

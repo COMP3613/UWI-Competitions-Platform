@@ -89,21 +89,25 @@ def add_results(mod_name, comp_name, team_name, score):
             print(f'{mod_name} is not authorized to add results for {comp_name}!')
             return None
         else:
+            results = {}
             for team in teams:
                 comp_team = CompetitionTeam.query.filter_by(comp_id=comp.id, team_id=team.id).first()
 
                 if comp_team:
                     comp_team.points_earned = score
                     comp_team.rating_score = (score/comp.max_score) * 20 * comp.level
+                    results[team.name] = score
                     try:
                         db.session.add(comp_team)
                         db.session.commit()
                         print(f'Score successfully added for {team_name}!')
-                        return comp_team
+                           
                     except Exception as e:
                         db.session.rollback()
                         print("Something went wrong!")
                         return None
+            comp.add_results(results)
+            return results
     return None
 
 
@@ -142,5 +146,5 @@ def update_ratings(mod_name, comp_name):
                     db.session.rollback()
 
         comp.confirm = True
-        print("Results finalized!")
+        print("Results finalized for " + comp.name + "!")
         return True
