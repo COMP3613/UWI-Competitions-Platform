@@ -1,26 +1,19 @@
-from App.database import db
-from sqlalchemy.sql import func
+from datetime import datetime
 
-class Ranking(db.Model):
-    __tablename__ = 'ranking'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    date = db.Column(db.DateTime, default=func.now())
-    ranking_score = db.Column(db.Integer, nullable=False)
-    
-    def __init__(self, student_id, date, ranking_score):
-      self.student_id = student_id
-      self.data = date
-      self.ranking_score = ranking_score
 
-    def get_json(self):
-      return {
-            "id" : self.id,
-            "student_id" : self.student_id,
-            "date" : self.date,
-            "ranking_score": self.ranking_score
-      }
+class Ranking:
+    def __init__(self, student_id: int, rank: int, date: datetime):
+        self.student_id = student_id  # The student's name
+        self.rank = rank         # The student's rank
+        self.date = date.now()
+
+    def to_dict(self):
+        """Convert the ranking to a dictionary format."""
+        return {
+            "student": self.student_id,
+            "rank": self.rank,
+            "date": self.date
+        }
 
     def __repr__(self):
-        return f'<Ranking {self.student_id} : {self.ranking_score}>'
+        return f'<Ranking {self.rank} : {self.student_id} : {self.date}>'
