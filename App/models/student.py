@@ -60,8 +60,8 @@ class Student(User, Observer):
             "ID": self.id,
             "Username": self.username,
             "Rating Score": self.rating_score,
-            "Number of Competitions": self.comp_count,
-            "Rank": self.curr_rank
+            "Number of Competitions" : self.comp_count,
+            "Rank" : self.curr_rank
         }
 
     def __repr__(self):

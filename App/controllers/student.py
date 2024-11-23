@@ -146,12 +146,9 @@ def display_rankings():
         if curr_high != student.rating_score:
             curr_rank = count
             curr_high = student.rating_score
-
         if student.comp_count != 0:
-            leaderboard.append(
-                {"placement": curr_rank, "student": student.username, "rating score": student.rating_score})
+            leaderboard.append({"placement": curr_rank, "student": student.username, "rating score":student.rating_score,"comp_count":student.comp_count})
             count += 1
-
     print("Rank\tStudent\tRating Score")
 
     for position in leaderboard:

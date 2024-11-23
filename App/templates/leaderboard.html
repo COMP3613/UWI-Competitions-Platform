@@ -1,32 +1,26 @@
-{% extends "layout.html" %}
-{% block title %}Homepage{% endblock %}
-{% block page %}UWI Competitions Platform{% endblock %}
+{% extends "layout.html" %} {% block title %}Homepage{% endblock %} {% block
+page %}UWI Competitions Platform{% endblock %} {{ super() }} {% block content %}
 
-{{ super() }}
+<!-- <style>
+  .tables-container {
+    display: flex;
+    justify-content: space-between;
+  }
 
-{% block content %}
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
 
-<style>
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid white;
+  }
 
-    .tables-container {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .leaderboard-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    .leaderboard-table th,
-    .leaderboard-table td {
-        padding: 12px 15px;
-        text-align: left;
-        border-bottom: 1px solid white;
-    }
-
-    /*.leaderboard-table th {
+  /*.leaderboard-table th {
         background-color: #f2f2f2;
         font-weight: bold;
     }
@@ -35,46 +29,98 @@
         background-color: #f2f2f2;
     }*/
 
-    .leaderboard-table tbody tr:hover {
-        background-color: black;
-    }
+  .leaderboard-table tbody tr:hover {
+    background-color: black;
+  }
 
-    .leaderboard-table tbody tr td a {
-        color: black;
-        text-decoration: none;
-        font-weight: bold;
-    }
+  .leaderboard-table tbody tr td a {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+  }
 
-    .leaderboard-table tbody tr td a:hover {
-        text-decoration: underline;
-    }
+  .leaderboard-table tbody tr td a:hover {
+    text-decoration: underline;
+  } -->
 </style>
-<div class="container">
-    <div class="tables-container">
-        <div class="leaderboard-table">
-            <center>
-                <h2 style="color: white; background-color: black; border-radius: 15px;">Leaderboard</h2>
-            </center>
-            <table class="table" style="font-family: verdana;">
-                <thead>
-                    <tr style="color: white;">
-                        <th><center>Overall Rank</center></th>
-                        <th><center>Username</center></th>
-                        <th><center>Rating Score</center></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student in leaderboard[:20] %}
-                    <tr style="color: white;">
-                        <td><center>{{student['placement']}}</center></td>
-                        <td><center><a style= "color: white;" href="{{url_for('index_views.student_profile_by_name', name=student['student'])}}">{{ student['student']}}</a></center></td>
-                        <td><center>{{'%0.2f' % student['rating score']|float}}</center></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+<div class="min-h-screen overflow-hidden bg-gray-100 p-4 px-[8vw]">
+  <div class="space-y-6">
+    <div class="bg-gray-200 p-4 rounded-md">
+      <div class="flex flex-col md:flex-row md:space-x-4">
+        <div class="flex flex-row items-center justify-center md:justify-start space-x-4 mb-4 md:mb-0">
+          <div class="flex items-center justify-center h-16 w-16 bg-gray-300 rounded-full text-lg font-bold">#1</div>
+          <div class="flex flex-col items-center md:items-start">
+            <div class="h-40 w-40 bg-gray-300 rounded-md"></div>
+            <div class="mt-2 text-center">{{ leaderboard[0]['student'] }}</div>
+          </div>
         </div>
+        <div class="flex-grow mt-4 md:mt-0">
+          <!--I hate flexbox so much... why does the rank chart mess everything up -->
+          <div class="h-40 bg-gray-300 rounded-md flex items-center justify-center">Rank Graph</div>
+        </div>
+        <div class="w-full md:w-64 mt-4 md:mt-0 space-y-3">
+          <div class="bg-gray-300 h-10 rounded-md px-4 flex items-center">Average placement</div>
+          <div class="bg-gray-300 h-10 rounded-md px-4 flex items-center">Number of Competitions</div>
+          <div class="bg-gray-300 h-10 rounded-md px-4 flex items-center">Recent Competitions</div>
+        </div>
+      </div>
     </div>
+
+    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+      <div class="bg-gray-200 p-4 rounded-md flex-grow">
+        <div class="flex flex-col md:flex-row space-x-0 md:space-x-4">
+          <div class="flex flex-row md:flex-row items-center justify-center md:justify-start space-x-4 mb-4 md:mb-0">
+            <div class="flex items-center justify-center h-16 w-16 bg-gray-300 rounded-full text-lg font-bold">#2</div>
+            <div class="flex flex-col items-center md:items-start">
+              <div class="h-32 w-32 bg-gray-300 rounded-md"></div>
+              <div class="mt-2 text-center">{{ leaderboard[1]['student'] }}</div>
+            </div>
+          </div>
+          <div class="flex-grow space-y-3 w-full">
+            <div class="bg-gray-300 h-8 rounded-md px-4 flex items-center">Average Rating</div>
+            <div class="bg-gray-300 h-8 rounded-md px-4 flex items-center">Number of Competitions</div>
+            <div class="bg-gray-300 h-8 rounded-md px-4 flex items-center">Recent Competitions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gray-200 p-4 rounded-md flex-grow">
+        <div class="flex flex-col md:flex-row space-x-0 md:space-x-4">
+          <div class="flex flex-row md:flex-row items-center justify-center md:justify-start space-x-4 mb-4 md:mb-0">
+            <div class="flex items-center justify-center h-16 w-16 bg-gray-300 rounded-full text-lg font-bold">#3</div>
+            <div class="flex flex-col items-center md:items-start">
+              <div class="h-32 w-32 bg-gray-300 rounded-md"></div>
+              <div class="mt-2 text-center">{{ leaderboard[2]['student'] }}</div>
+            </div>
+          </div>
+          <div class="flex-grow space-y-3 w-full">
+            <div class="bg-gray-300 h-8 rounded-md px-4 flex items-center">Average Rating</div>
+            <div class="bg-gray-300 h-8 rounded-md px-4 flex items-center">Number of Competitions</div>
+            <div class="bg-gray-300 h-8 rounded-md px-4 flex items-center">Recent Competitions</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="space-y-2">
+      {%for student in leaderboard[3:]%}
+      <div class="bg-gray-200 p-4 flex rounded-md">
+        <div class="flex items-center space-x-4 min-w-[150px] md:min-w-[200px] flex-1 md:flex-none">
+          <div class="flex items-center justify-center h-12 w-12 bg-gray-300 rounded-full text-lg font-bold">#{{student['placement']}}</div>
+          <div class="truncate md:truncate-none">{{student['student']}}</div>
+        </div>
+        <div class="hidden md:flex items-center justify-center flex-1">
+          <div>Competitions: {{student['comp_count']}}</div>
+        </div>
+        <div class="flex items-center justify-end min-w-[120px] md:min-w-[150px]">
+          <div>Rating: {{student['rating score'] | round(2)}}</div> <!--i think we should change this naming convention, its confusing to work with-->
+        </div>
+      </div>
+      {%endfor%}
+    </div>
+  </div>
 </div>
-<div style="padding: 20px;"></div>
 {% endblock %}
+
