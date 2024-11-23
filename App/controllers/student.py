@@ -1,5 +1,6 @@
 from App.database import db
-from App.models import Student, Competition, Notification, CompetitionTeam
+from App.models import Student, Competition, Notification, CompetitionTeam, StudentMemento
+
 
 def create_student(username, password):
     student = get_student_by_username(username)
@@ -18,14 +19,18 @@ def create_student(username, password):
         print(f'Something went wrong creating {username}')
         return None
 
+
 def get_student_by_username(username):
     return Student.query.filter_by(username=username).first()
+
 
 def get_student(id):
     return Student.query.get(id)
 
+
 def get_all_students():
     return Student.query.all()
+
 
 def get_all_students_json():
     students = Student.query.all()
@@ -33,6 +38,7 @@ def get_all_students_json():
         return []
     students_json = [student.get_json() for student in students]
     return students_json
+
 
 def update_student(id, username):
     student = get_student(id)
@@ -50,6 +56,7 @@ def update_student(id, username):
     print("ID: {id} does not exist!")
     return None
 
+
 def display_student_info(username):
     student = get_student_by_username(username)
 
@@ -58,7 +65,7 @@ def display_student_info(username):
         return None
     else:
         competitions = []
-        
+
         for team in student.teams:
             team_comps = CompetitionTeam.query.filter_by(team_id=team.id).all()
             for comp_team in team_comps:
@@ -66,11 +73,13 @@ def display_student_info(username):
                 competitions.append(comp.name)
 
         profile_info = {
-            "profile" : student.get_json(),
-            "competitions" : competitions
+            "profile": student.get_json(),
+            "historical_data": get_historical_ranking(student.username),
+            "competitions": competitions
         }
-
+        print(get_historical_ranking(student.username))
         return profile_info
+
 
 def display_notifications(username):
     student = get_student_by_username(username)
@@ -79,28 +88,29 @@ def display_notifications(username):
         print(f'{username} does not exist!')
         return None
     else:
-        return {"notifications":[notification.to_Dict() for notification in student.notifications]}
+        return {"notifications": [notification.to_Dict() for notification in student.notifications]}
+
 
 def update_rankings():
     students = get_all_students()
-    
+
     students.sort(key=lambda x: (x.rating_score, x.comp_count), reverse=True)
 
     leaderboard = []
     count = 1
-    
+
     curr_high = students[0].rating_score
     curr_rank = 1
-        
+
     for student in students:
         if curr_high != student.rating_score:
             curr_rank = count
             curr_high = student.rating_score
 
         if student.comp_count != 0:
-            leaderboard.append({"placement": curr_rank, "student": student.username, "rating score":student.rating_score})
+            leaderboard.append(
+                {"placement": curr_rank, "student": student.username, "rating score": student.rating_score})
             count += 1
-        
             student.curr_rank = curr_rank
             if student.prev_rank == 0:
                 message = f'RANK : {student.curr_rank}. Congratulations on your first rank!'
@@ -119,8 +129,8 @@ def update_rankings():
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
-
     return leaderboard
+
 
 def display_rankings():
     students = get_all_students()
@@ -131,7 +141,7 @@ def display_rankings():
     count = 1
     curr_high = students[0].rating_score
     curr_rank = 1
-        
+
     for student in students:
         if curr_high != student.rating_score:
             curr_rank = count
@@ -139,10 +149,25 @@ def display_rankings():
         if student.comp_count != 0:
             leaderboard.append({"placement": curr_rank, "student": student.username, "rating score":student.rating_score,"comp_count":student.comp_count})
             count += 1
-
     print("Rank\tStudent\tRating Score")
 
     for position in leaderboard:
         print(f'{position["placement"]}\t{position["student"]}\t{position["rating score"]}')
-    
+
     return leaderboard
+
+
+def get_historical_ranking(username, timeframe=180):
+    student = Student.query.filter_by(username=username).first()
+    if not student:
+        return {"error": "student not found"}
+    historical_data = []
+    mementos = StudentMemento.get_history_in_range(username, timeframe)
+    print(mementos,"MEMENTOS")
+    for memento in mementos:
+        historical_data.append({
+            "timestamp": memento.timestamp,
+            "curr_rank": memento.curr_rank,
+            "rating_score": memento.rating_score,
+        })
+    return historical_data

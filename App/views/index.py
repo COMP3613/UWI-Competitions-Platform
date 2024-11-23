@@ -189,6 +189,7 @@ def student_profile(id):
     
     profile_info = display_student_info(student.username)
     competitions = profile_info['competitions']
+    history = profile_info['historical_data']
     """
     competitions = Competition.query.filter(Competition.participants.any(id=user_id)).all()
     ranking = Ranking.query.filter_by(student_id=user_id).first()
@@ -206,13 +207,14 @@ def student_profile_by_name(name):
     
     profile_info = display_student_info(student.username)
     competitions = profile_info['competitions']
+    history = profile_info['historical_data']
     """
     competitions = Competition.query.filter(Competition.participants.any(id=user_id)).all()
     ranking = Ranking.query.filter_by(student_id=user_id).first()
     notifications= get_notifications(user.username)
     """
 
-    return render_template('student_profile.html', student=student, competitions=competitions, user=current_user)
+    return render_template('student_profile.html', student=student, competitions=competitions, user=current_user, history=history)
 
 @index_views.route('/moderator_profile/<int:id>', methods=['GET'])
 def moderator_profile(id):   
