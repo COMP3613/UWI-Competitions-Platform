@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import Student, Competition, Notification, CompetitionTeam, StudentMemento
+from App.models import Student, Competition, Notification, CompetitionTeam
 
 
 def create_student(username, password):
@@ -74,10 +74,9 @@ def display_student_info(username):
 
         profile_info = {
             "profile": student.get_json(),
-            "historical_data": get_historical_ranking(student.username),
             "competitions": competitions
         }
-        print(get_historical_ranking(student.username))
+
         return profile_info
 
 
@@ -111,6 +110,7 @@ def update_rankings():
             leaderboard.append(
                 {"placement": curr_rank, "student": student.username, "rating score": student.rating_score})
             count += 1
+
             student.curr_rank = curr_rank
             if student.prev_rank == 0:
                 message = f'RANK : {student.curr_rank}. Congratulations on your first rank!'
@@ -129,6 +129,7 @@ def update_rankings():
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
+
     return leaderboard
 
 
@@ -143,6 +144,9 @@ def display_rankings():
     curr_rank = 1
 
     for student in students:
+
+        competitions = student.competitions
+        competitions.sort(key=lambda x: x.date, reverse=True)
         historical_ranking = (get_historical_ranking(student))
         if curr_high != student.rating_score:
             curr_rank = count
@@ -153,28 +157,14 @@ def display_rankings():
                  "student": student.username, 
                  "rating score":student.rating_score,
                  "comp_count":student.comp_count, 
+                 "competitions": competitions,
                  "history": historical_ranking} 
             )
             count += 1
+
     print("Rank\tStudent\tRating Score")
 
     for position in leaderboard:
         print(f'{position["placement"]}\t{position["student"]}\t{position["rating score"]}')
 
     return leaderboard
-
-
-def get_historical_ranking(username, timeframe=180):
-    student = Student.query.filter_by(username=username).first()
-    if not student:
-        return {"error": "student not found"}
-    historical_data = []
-    mementos = StudentMemento.get_history_in_range(username, timeframe)
-    print(mementos,"MEMENTOS")
-    for memento in mementos:
-        historical_data.append({
-            "timestamp": memento.timestamp,
-            "curr_rank": memento.curr_rank,
-            "rating_score": memento.rating_score,
-        })
-    return historical_data
