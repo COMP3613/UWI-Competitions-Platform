@@ -114,6 +114,7 @@ def add_results(mod_name, comp_name, team_name, score):
 def update_ratings(mod_name, comp_name):
     mod = Moderator.query.filter_by(username=mod_name).first()
     comp = Competition.query.filter_by(name=comp_name).first()
+    print(comp_name)
 
     if not mod:
         print(f'{mod_name} was not found!')
@@ -137,10 +138,11 @@ def update_ratings(mod_name, comp_name):
             team = Team.query.filter_by(id=comp_team.team_id).first()
 
             for stud in team.students:
-                x =  stud.create_memento()
+                x = stud.create_memento()
                 print(x)
                 stud.rating_score = (stud.rating_score*stud.comp_count + comp_team.rating_score)/(stud.comp_count+1)
                 stud.comp_count += 1
+                stud.competitions.append(comp)
                 try:
                     db.session.add(stud)
                     db.session.commit()

@@ -144,13 +144,10 @@ def display_rankings():
     curr_rank = 1
 
     for student in students:
-        competitions = []
-        for team in student.teams:
-            team_comps = CompetitionTeam.query.filter_by(team_id=team.id).all()
-            for comp_team in team_comps:
-                comp = Competition.query.filter_by(id=comp_team.comp_id).first()
-                competitions.append(comp)
-            competitions.sort(key=lambda x: x.date, reverse=True)
+        competitions = student.competitions
+        if student.username == "michelle":
+            print(student.competitions)
+        competitions.sort(key=lambda x: x.date, reverse=True)
         if curr_high != student.rating_score:
             curr_rank = count
             curr_high = student.rating_score
