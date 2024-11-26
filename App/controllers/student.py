@@ -144,15 +144,22 @@ def display_rankings():
     curr_rank = 1
 
     for student in students:
+
         competitions = student.competitions
         competitions.sort(key=lambda x: x.date, reverse=True)
+        historical_ranking = (get_historical_ranking(student))
         if curr_high != student.rating_score:
             curr_rank = count
             curr_high = student.rating_score
         if student.comp_count != 0:
             leaderboard.append(
-                {"placement": curr_rank, "student": student.username, "rating score": student.rating_score,
-                 "comp_count": student.comp_count, "competitions": competitions})
+                {"placement": curr_rank, 
+                 "student": student.username, 
+                 "rating score":student.rating_score,
+                 "comp_count":student.comp_count, 
+                 "competitions": competitions,
+                 "history": historical_ranking} 
+            )
             count += 1
 
     print("Rank\tStudent\tRating Score")
