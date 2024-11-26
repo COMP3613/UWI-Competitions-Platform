@@ -1,5 +1,6 @@
+
 from App.database import db
-from App.models import Student, Competition, Notification, CompetitionTeam
+from App.models import Student, Competition, Notification, CompetitionTeam, StudentMemento
 
 
 def create_student(username, password):
@@ -102,10 +103,7 @@ def update_rankings():
     curr_rank = 1
 
     for student in students:
-        if curr_high != student.rating_score:
-            curr_rank = count
-            curr_high = student.rating_score
-
+        curr_rank = count
         if student.comp_count != 0:
             leaderboard.append(
                 {"placement": curr_rank, "student": student.username, "rating score": student.rating_score})
@@ -132,6 +130,10 @@ def update_rankings():
 
     return leaderboard
 
+def get_historical_ranking(student):
+    ranking = StudentMemento.get_history_in_range(student.username,180)
+    return ranking
+
 
 def display_rankings():
     students = get_all_students()
@@ -139,28 +141,22 @@ def display_rankings():
     students.sort(key=lambda x: (x.rating_score, x.comp_count), reverse=True)
 
     leaderboard = []
-    count = 1
-    curr_high = students[0].rating_score
-    curr_rank = 1
-
     for student in students:
-
         competitions = student.competitions
         competitions.sort(key=lambda x: x.date, reverse=True)
         historical_ranking = (get_historical_ranking(student))
-        if curr_high != student.rating_score:
-            curr_rank = count
-            curr_high = student.rating_score
+        # if curr_high != student.rating_score:
+        #     curr_rank = count
+        #     curr_high = student.rating_score
         if student.comp_count != 0:
             leaderboard.append(
-                {"placement": curr_rank, 
+                {"placement": student.curr_rank,
                  "student": student.username, 
                  "rating score":student.rating_score,
                  "comp_count":student.comp_count, 
                  "competitions": competitions,
                  "history": historical_ranking} 
             )
-            count += 1
 
     print("Rank\tStudent\tRating Score")
 
