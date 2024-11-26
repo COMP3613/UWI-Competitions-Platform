@@ -145,8 +145,6 @@ def display_rankings():
 
     for student in students:
         competitions = student.competitions
-        if student.username == "michelle":
-            print(student.competitions)
         competitions.sort(key=lambda x: x.date, reverse=True)
         if curr_high != student.rating_score:
             curr_rank = count
