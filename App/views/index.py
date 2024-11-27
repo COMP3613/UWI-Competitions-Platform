@@ -206,7 +206,7 @@ def student_profile_by_name(name):
     
     profile_info = display_student_info(student.username)
     competitions = profile_info['competitions']
-    history = profile_info['historical_data']
+    history = get_historical_ranking(student)
     """
     competitions = Competition.query.filter(Competition.participants.any(id=user_id)).all()
     ranking = Ranking.query.filter_by(student_id=user_id).first()
