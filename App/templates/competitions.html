@@ -1,12 +1,7 @@
-{% extends "layout.html" %}
-{% block title %}Competitions{% endblock %}
-{% block page %}UWI Competitions Platform{% endblock %}
+{% extends "layout.html" %} {% block title %}Competitions{% endblock %} {% block
+page %}UWI Competitions Platform{% endblock %} {{ super() }} {% block content %}
 
-{{ super() }}
-
-{% block content %}
-
-<style>
+<!-- <style>
 
     *{
         /* margin: 0px; */
@@ -45,17 +40,14 @@
         text-decoration: none;
         color: black;
         display: block;
-    }
+    } -->
+<!-- 
+/* .card p{ color: #666; font-size: 15px; line-height: 1.3; } */ -->
+<!-- </style> -->
 
-/*     .card p{
-        color: #666;
-        font-size: 15px;
-        line-height: 1.3;
-    } */
-
-</style>
-<div style="display: flex;">
-    <div>
+<div class="flex flex-row min-h-screen px-8">
+  <div class="flex-row text-xl text-white">Competitions</div>
+  <!-- <div>
         <center><h2 style="margin-left: 50px; color: white;">Competitions</h2></center>
     </div>
     {% if session['user_type'] == 'moderator' %}
@@ -93,10 +85,9 @@
                     </p> 
                 </div>
             </a>
-        </div>
-    
-    {% endfor %}
+        </div> -->
 
+  {% endfor %}
 </div>
- 
+
 {% endblock %}
