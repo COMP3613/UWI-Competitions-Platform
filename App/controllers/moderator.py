@@ -138,8 +138,6 @@ def update_ratings(mod_name, comp_name):
             team = Team.query.filter_by(id=comp_team.team_id).first()
 
             for stud in team.students:
-                x = stud.create_memento()
-                print(x)
                 stud.rating_score = (stud.rating_score*stud.comp_count + comp_team.rating_score)/(stud.comp_count+1)
                 stud.comp_count += 1
                 stud.competitions.append(comp)
@@ -150,5 +148,6 @@ def update_ratings(mod_name, comp_name):
                     db.session.rollback()
 
         comp.confirm = True
+
         print("Results finalized for " + comp.name + "!")
         return True

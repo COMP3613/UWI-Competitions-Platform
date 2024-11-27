@@ -44,3 +44,4 @@ class Team(db.Model):
             "Name" : self.name,
             "Students" : [student.username for student in self.student]
         }
+

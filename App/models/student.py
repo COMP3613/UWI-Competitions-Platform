@@ -67,9 +67,9 @@ class Student(User, Observer):
     def __repr__(self):
         return f'<Student {self.id} : {self.username}>'
 
-    # def update_rankings(self):
-    #     self.caretaker.save_memento(self.originator.create_memento())
-    #     print(f"Updating rankings for {self.username}...")
+    def update_rankings(self):
+        self.caretaker.save_memento(self.originator.create_memento())
+        print(f"Updating rankings for {self.username}...")
 
 
 # Define the association table

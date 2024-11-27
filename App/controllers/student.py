@@ -98,11 +98,10 @@ def update_rankings():
 
     leaderboard = []
     count = 1
-
-    curr_high = students[0].rating_score
     curr_rank = 1
 
     for student in students:
+        student.create_memento()
         curr_rank = count
         if student.comp_count != 0:
             leaderboard.append(

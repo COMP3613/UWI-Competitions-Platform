@@ -21,23 +21,23 @@
   </head>
 
   <body class="">
-    <div
-      class="nav-large items-center py-6 border-b-2 border-black text-[#93DEFF] flex-row"
-    >
+    <div class="nav-large items-center py-6 bg-[#051923] text-white flex-row">
       <div class="links lg:px-[8vw]">
         <div class="hidden md:flex justify-between">
           <div class="flex font-medium items-center space-x-16">
             <a href="/" class="text-4xl font-bold">UWI Competitions Platform</a>
-            <div class="p-2 bg-[#323643] rounded-md">Leaderboard</div>
-            <div class="p-2 bg-[#323643] rounded-md">Competitions</div>
+            <a href="/leaderboard" class="p-2 rounded-md">Leaderboard</a>
+            <a href="/competitions" class="p-2 rounded-md">Competitions</a>
           </div>
           <div class="flex space-x-6">
             {% if user.is_authenticated %}
-            <img
-              src="https://i.pinimg.com/originals/c5/46/0e/c5460e3896ab18c0bf2910ca15e2f576.jpg"
-              alt=""
-              class="h-[64px] w-[64px] align-middle rounded-full"
-            />
+            <a href="/profile">
+              <img
+                src="{{url_for('static', filename='defaultProfilePicture.png')}}"
+                alt=""
+                class="h-[64px] w-[64px] align-middle rounded-full"
+              />
+            </a>
             {% else %}
             <div><a href="/signup">Sign Up</a></div>
             <div><a href="/login">Log In</a></div>
@@ -46,7 +46,6 @@
         </div>
       </div>
     </div>
-
 
     {% block content %}{% endblock %}
 
