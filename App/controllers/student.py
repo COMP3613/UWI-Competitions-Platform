@@ -1,4 +1,3 @@
-
 from App.database import db
 from App.models import Student, Competition, Notification, CompetitionTeam, StudentMemento
 
@@ -60,6 +59,7 @@ def update_student(id, username):
 
 def display_student_info(username):
     student = get_student_by_username(username)
+    history = get_historical_ranking(student)
 
     if not student:
         print(f'{username} does not exist!')
@@ -75,7 +75,8 @@ def display_student_info(username):
 
         profile_info = {
             "profile": student.get_json(),
-            "competitions": competitions
+            "competitions": competitions,
+            "history": history
         }
 
         return profile_info
@@ -91,46 +92,8 @@ def display_notifications(username):
         return {"notifications": [notification.to_Dict() for notification in student.notifications]}
 
 
-def update_rankings():
-    students = get_all_students()
-
-    students.sort(key=lambda x: (x.rating_score, x.comp_count), reverse=True)
-
-    leaderboard = []
-    count = 1
-    curr_rank = 1
-
-    for student in students:
-        student.create_memento()
-        curr_rank = count
-        if student.comp_count != 0:
-            leaderboard.append(
-                {"placement": curr_rank, "student": student.username, "rating score": student.rating_score})
-            count += 1
-
-            student.curr_rank = curr_rank
-            if student.prev_rank == 0:
-                message = f'RANK : {student.curr_rank}. Congratulations on your first rank!'
-            elif student.curr_rank == student.prev_rank:
-                message = f'RANK : {student.curr_rank}. Well done! You retained your rank.'
-            elif student.curr_rank < student.prev_rank:
-                message = f'RANK : {student.curr_rank}. Congratulations! Your rank has went up.'
-            else:
-                message = f'RANK : {student.curr_rank}. Oh no! Your rank has went down.'
-            student.prev_rank = student.curr_rank
-            notification = Notification(student.id, message)
-            student.notifications.append(notification)
-
-            try:
-                db.session.add(student)
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
-
-    return leaderboard
-
 def get_historical_ranking(student):
-    ranking = StudentMemento.get_history_in_range(student.username,180)
+    ranking = StudentMemento.get_history_in_range(student.username, 180)
     return ranking
 
 
@@ -141,7 +104,10 @@ def display_rankings():
 
     leaderboard = []
     for student in students:
-        competitions = student.competitions
+        competitions = []
+        for team in student.teams:
+            team_comps = Competition.query.join(Competition.teams).filter(Competition.teams.any(id=team.id)).all()
+            competitions.extend(team_comps)
         competitions.sort(key=lambda x: x.date, reverse=True)
         historical_ranking = (get_historical_ranking(student))
         # if curr_high != student.rating_score:
@@ -150,11 +116,11 @@ def display_rankings():
         if student.comp_count != 0:
             leaderboard.append(
                 {"placement": student.curr_rank,
-                 "student": student.username, 
-                 "rating score":student.rating_score,
-                 "comp_count":student.comp_count, 
+                 "student": student.username,
+                 "rating score": student.rating_score,
+                 "comp_count": student.comp_count,
                  "competitions": competitions,
-                 "history": historical_ranking} 
+                 "history": historical_ranking}
             )
 
     print("Rank\tStudent\tRating Score")

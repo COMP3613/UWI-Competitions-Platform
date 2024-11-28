@@ -5,6 +5,7 @@ from datetime import datetime, date
 
 from flask.cli import with_appcontext, AppGroup
 
+from App.controllers.ranking import update_ratings, update_rankings
 from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import *
@@ -68,9 +69,9 @@ def initialize():
         reader = csv.DictReader(competitions_file)
 
         for competition in reader:
-            if competition['comp_name'] != 'TopCoder':
-                update_ratings(competition['mod_name'], competition['comp_name'])
-                update_rankings()
+            # if competition['comp_name'] != 'TopCoder':
+            confirm_competition(competition['mod_name'], competition['comp_name'])
+            update_rankings()
             #db.session.add(comp)
         #db.session.commit()
     

@@ -1,12 +1,11 @@
 from App.database import db
 from datetime import datetime
 
-from App.models.observer import Observer
-from App.models.subject import Subject
+
 from .competition_moderator import *
 from .competition_team import *
 
-class Competition(db.Model, Subject):
+class Competition(db.Model):
     __tablename__='competition'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -20,7 +19,6 @@ class Competition(db.Model, Subject):
     teams = db.relationship('Team', secondary="competition_team", overlaps='competitions', lazy=True)
 
     results = db.Column(db.JSON, default=[])
-    observers = db.relationship('Student', secondary="competition_observer", overlaps='competitions', lazy=True)
 
     def __init__(self, name, date, location, level, max_score):
         self.name = name
@@ -30,7 +28,6 @@ class Competition(db.Model, Subject):
         self.max_score = max_score
         self.moderators = []
         self.teams = []
-        self.observers = []
         self.results = []
     
     def add_mod(self, mod):
@@ -100,26 +97,3 @@ class Competition(db.Model, Subject):
         """Add results and notify observers"""
         self.results.append(results)
         db.session.commit()
-        self.notify_observers()
-
-    def register_observer(self, observer: Observer):
-        """Register an observer"""
-        self.observers.append(observer)
-        db.session.commit()
-        print(observer, " added as an observer for " + self.name)
-
-    def remove_observer(self, observer: Observer):
-        """Remove an observer"""
-        self.observers.remove(observer)
-        db.session.commit()
-        print("Observer " + observer + " removed for " + self.name)
-    
-    def notify_observers(self):
-        """Notify all observers about changes"""
-        for observer in self.observers:
-            print("Notifying Observers...")
-            try:
-                observer.update_rankings()
-                print(f"OBSERVER {observer} notified successfully.")
-            except Exception as e:
-                print(f"Error notifying observer {observer}: {e}")
