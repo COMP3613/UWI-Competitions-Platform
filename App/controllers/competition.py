@@ -1,3 +1,4 @@
+from App.controllers.ranking import update_ratings
 from App.database import db
 from App.models import Competition, Moderator, CompetitionTeam, Team, Student#, Student, Admin, competition_student
 from datetime import datetime
@@ -40,7 +41,6 @@ def get_all_competitions_json():
         return []
     else:
         return [comp.get_json() for comp in competitions]
-
 def display_competition_results(name):
     comp = get_competition_by_name(name)
 
@@ -69,3 +69,72 @@ def display_competition_results(name):
             count += 1
         
         return leaderboard
+
+
+def add_results(mod_name, comp_name, team_name, score):
+    mod = Moderator.query.filter_by(username=mod_name).first()
+    comp = Competition.query.filter_by(name=comp_name).first()
+    teams = Team.query.filter_by(name=team_name).all()
+
+    if not mod:
+        print(f'{mod_name} was not found!')
+        return None
+    else:
+        if not comp:
+            print(f'{comp_name} was not found!')
+            return None
+        elif comp.confirm:
+            print(f'Results for {comp_name} have already been finalized!')
+            return None
+        elif mod not in comp.moderators:
+            print(f'{mod_name} is not authorized to add results for {comp_name}!')
+            return None
+        else:
+            results = {}
+            for team in teams:
+                comp_team = CompetitionTeam.query.filter_by(comp_id=comp.id, team_id=team.id).first()
+
+                if comp_team:
+                    comp_team.points_earned = score
+                    comp_team.rating_score = (score / comp.max_score) * 20 * comp.level
+                    results[team.name] = score
+                    try:
+                        db.session.add(comp_team)
+                        db.session.commit()
+                        print(f'Score successfully added for {team_name}!')
+
+                    except Exception as e:
+                        db.session.rollback()
+                        print("Something went wrong!")
+                        return None
+            comp.add_results(results)
+            return results
+    return None
+
+def confirm_competition(mod_name,comp_name):
+    mod = Moderator.query.filter_by(username=mod_name).first()
+    comp = Competition.query.filter_by(name=comp_name).first()
+    if not mod:
+        print(f'{mod_name} was not found!')
+        return None
+    elif not comp:
+        print(f'{comp_name} was not found!')
+        return None
+    elif comp.confirm:
+        print(f'Results for {comp_name} has already been finalized!')
+        return None
+    elif mod not in comp.moderators:
+        print(f'{mod_name} is not authorized to add results for {comp_name}!')
+        return None
+    elif len(comp.teams) == 0:
+        print(f'No teams found. Results can not be confirmed!')
+        return None
+    else:
+        comp = Competition.query.filter_by(name=comp_name).first()
+    if comp.confirm is True:
+        print("This competition has already been confirmed")
+        return None
+    comp.confirm = True
+    print(f'{mod_name} has finalized results for {comp_name}!')
+    update_ratings(comp_name)
+    return True

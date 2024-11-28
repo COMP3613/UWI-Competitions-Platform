@@ -1,10 +1,9 @@
 from App.database import db
 from App.models import User
-from App.models.observer import Observer
 from App.models.student_memento import StudentMemento
 
 
-class Student(User, Observer):
+class Student(User):
     __tablename__ = 'student'
 
     rating_score = db.Column(db.Float, nullable=False, default=0)
@@ -13,7 +12,6 @@ class Student(User, Observer):
     prev_rank = db.Column(db.Integer, nullable=False, default=0)
     teams = db.relationship('Team', secondary='student_team', overlaps='students', lazy=True)
     notifications = db.relationship('Notification', backref='student', lazy=True)
-    competitions = db.relationship('Competition', secondary='competition_observer', back_populates='observers')
 
     def __init__(self, username, password):
         super().__init__(username, password)
@@ -23,6 +21,11 @@ class Student(User, Observer):
         self.prev_rank = 0
         self.teams = []
         self.notifications = []
+
+    def update_student(self, rating, rank):
+        self.rating_score = rating
+        self.prev_rank = self.curr_rank
+        self.curr_rank = rank
 
     def add_notification(self, notification):
         if notification:
@@ -38,7 +41,7 @@ class Student(User, Observer):
     def create_memento(self):
         memento = StudentMemento(
             student_id=self.id,
-            username = self.username,
+            username=self.username,
             rating_score=self.rating_score,
             curr_rank=self.curr_rank,
         )
@@ -60,20 +63,9 @@ class Student(User, Observer):
             "ID": self.id,
             "Username": self.username,
             "Rating Score": self.rating_score,
-            "Number of Competitions" : self.comp_count,
-            "Rank" : self.curr_rank
+            "Number of Competitions": self.comp_count,
+            "Rank": self.curr_rank
         }
 
     def __repr__(self):
         return f'<Student {self.id} : {self.username}>'
-
-    def update_rankings(self):
-        self.caretaker.save_memento(self.originator.create_memento())
-        print(f"Updating rankings for {self.username}...")
-
-
-# Define the association table
-competition_observer = db.Table('competition_observer',
-                                db.Column('competition_id', db.Integer, db.ForeignKey('competition.id')),
-                                db.Column('student_id', db.Integer, db.ForeignKey('student.id'))
-                                )

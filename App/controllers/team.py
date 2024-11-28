@@ -94,8 +94,6 @@ def add_team(mod_name, comp_name, team_name, students):
         if team:
             comp.add_team(team)
             print(f'New Team: {team_name} created')
-            for stud in team.students:
-                    comp.register_observer(stud)
             return team
         else:
             return None
