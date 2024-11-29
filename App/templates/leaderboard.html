@@ -163,15 +163,12 @@ page %}UWI Competitions Platform{% endblock %} {{ super() }} {% block content %}
         },
       {% endfor %}
     ].filter(entry => entry.value !== 0);
-    data = data.reverse();
-     data.push({
+      data.push({
       date: formattedDate,
       value: 1,
       rating: {{leaderboard[0]['rating score']}}
     });
-
-
-
+    console.log(data)
     genGraph(data); 
   });
 
