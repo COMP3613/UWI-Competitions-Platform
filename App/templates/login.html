@@ -7,6 +7,10 @@
 {% block content %}
 
 <style>
+    .message{
+        color: white;
+        font-size: 15px;
+    }
 
     .center{
         margin: 0;
@@ -132,7 +136,7 @@
     <h2 style="color: white;">Login</h2>
     
     <form action="{{ url_for('auth_views.login') }}" method="post" style="font-family: helvetica;">
-        
+        <div class="message">{{ message }}</div>
         <div class="txt_field">
             <input style="color: white;" type="text"  id="username" name="username" required>
             <label style="color: white;" for="username">Username:</label>
