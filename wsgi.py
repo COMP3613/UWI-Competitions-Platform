@@ -278,12 +278,8 @@ def display_competition_results_command(name):
 @click.argument("team_name", default="team1")
 @click.argument("score", default=10)
 def add_results_command(name, team_name, score):
-    comp = get_competition_by_name(name)
-    results = {}
-    if comp:
-        results[team_name] = score
-        comp.add_results(results)
-        print(f"Results for {team_name} were added to {name} successfully")
+    invoker.set_on_start(AddResultsToCompetition(name, team_name, score))
+    invoker.execute_command()
 
 app.cli.add_command(comp_cli)
 

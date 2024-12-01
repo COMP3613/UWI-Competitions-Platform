@@ -49,3 +49,18 @@ class UpdateRating(Command):
         db.session.add(competition)
         db.session.commit()
 
+class AddResultsToCompetition(Command):
+    def __init__(self, competition, team_name, score):
+        self.competition = competition
+        self.team_name = team_name
+        self.score = score
+
+    def execute(self):
+        results = {}
+        competition = Competition.query.filter_by(name=self.competition).first()
+        
+        results[self.team_name] = self.score
+        competition.add_results(results)
+        
+        db.session.commit()
+        print("Results added successfully.")
