@@ -7,7 +7,7 @@ from flask.cli import with_appcontext, AppGroup
 
 from App.controllers.command_invoker import CommandInvoker
 from App.controllers.commands import *
-from App.controllers.ranking import update_ratings, update_rankings
+# from App.controllers.ranking import update_ratings, update_rankings
 from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import *
@@ -224,8 +224,8 @@ def add_results_command(mod_name, comp_name, team_name, student1, student2, stud
 @click.argument("mod_name", default="mod1")
 @click.argument("comp_name", default="comp1")
 def update_rankings_command(mod_name, comp_name):
-    invoker.set_on_start(update_ratings(comp_name))
-    invoker.set_on_finish(update_rankings())
+    invoker.set_on_start(UpdateRating(comp_name))
+    invoker.set_on_finish(UpdateRank())
 
 @mod_cli.command("rankings", help="Displays overall rankings")
 def display_rankings_command():
