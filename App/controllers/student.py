@@ -93,8 +93,7 @@ def display_notifications(username):
 
 
 def get_historical_ranking(student):
-    ranking = StudentMemento.get_history_in_range(student.username, 180)
-    return ranking
+    return student.mementos
 
 
 def display_rankings():
