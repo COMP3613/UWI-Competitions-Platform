@@ -1,6 +1,6 @@
 from App.database import db
 from App.models import User
-from App.models.student_memento import StudentMemento
+from App.models.student_history import StudentMemento
 
 
 class Student(User):
@@ -12,6 +12,7 @@ class Student(User):
     prev_rank = db.Column(db.Integer, nullable=False, default=0)
     teams = db.relationship('Team', secondary='student_team', overlaps='students', lazy=True)
     notifications = db.relationship('Notification', backref='student', lazy=True)
+    mementos = db.relationship('StudentMemento', backref='student', lazy=True)
 
     def __init__(self, username, password):
         super().__init__(username, password)
@@ -41,12 +42,13 @@ class Student(User):
     def create_memento(self):
         memento = StudentMemento(
             student_id=self.id,
-            username=self.username,
             rating_score=self.rating_score,
             curr_rank=self.curr_rank,
         )
         db.session.add(memento)
         db.session.commit()
+        for memento in self.mementos:
+            print(memento.rating_score , self.username)
         return memento
 
     def get_json(self):
@@ -66,6 +68,18 @@ class Student(User):
             "Number of Competitions": self.comp_count,
             "Rank": self.curr_rank
         }
+    def update_rating(self,rating):
+        self.rating_score = rating
+        db.session.commit()
+
+    def update_ranking(self,rank):
+        self.prev_rank = self.curr_rank
+        self.curr_rank = rank
+        db.session.commit()
+
+    def update_notifications(self,notification):
+        self.notifications.append(notification)
+        db.session.commit()
 
     def __repr__(self):
         return f'<Student {self.id} : {self.username}>'

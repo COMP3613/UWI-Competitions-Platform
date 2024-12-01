@@ -110,31 +110,3 @@ def add_results(mod_name, comp_name, team_name, score):
             comp.add_results(results)
             return results
     return None
-
-def confirm_competition(mod_name,comp_name):
-    mod = Moderator.query.filter_by(username=mod_name).first()
-    comp = Competition.query.filter_by(name=comp_name).first()
-    if not mod:
-        print(f'{mod_name} was not found!')
-        return None
-    elif not comp:
-        print(f'{comp_name} was not found!')
-        return None
-    elif comp.confirm:
-        print(f'Results for {comp_name} has already been finalized!')
-        return None
-    elif mod not in comp.moderators:
-        print(f'{mod_name} is not authorized to add results for {comp_name}!')
-        return None
-    elif len(comp.teams) == 0:
-        print(f'No teams found. Results can not be confirmed!')
-        return None
-    else:
-        comp = Competition.query.filter_by(name=comp_name).first()
-    if comp.confirm is True:
-        print("This competition has already been confirmed")
-        return None
-    comp.confirm = True
-    print(f'{mod_name} has finalized results for {comp_name}!')
-    update_ratings(comp_name)
-    return True
