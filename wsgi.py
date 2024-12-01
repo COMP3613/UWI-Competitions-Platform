@@ -273,6 +273,18 @@ def list_competition_command():
 def display_competition_results_command(name):
     print(display_competition_results(name))
 
+@comp_cli.command("addResults", help="Adds results to a competition")
+@click.argument("name", default="comp1")
+@click.argument("team_name", default="team1")
+@click.argument("score", default=10)
+def add_results_command(name, team_name, score):
+    comp = get_competition_by_name(name)
+    results = {}
+    if comp:
+        results[team_name] = score
+        comp.add_results(results)
+        print(f"Results for {team_name} were added to {name} successfully")
+
 app.cli.add_command(comp_cli)
 
 '''
