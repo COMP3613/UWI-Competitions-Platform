@@ -5,9 +5,12 @@ from App.main import create_app
 from App.database import db, create_db
 from App.models import *
 from App.controllers import *
+from App.controllers.commands import *
+
 
 
 LOGGER = logging.getLogger(__name__)
+invoker = CommandInvoker()
 
 '''
    Unit Tests
@@ -195,14 +198,20 @@ class IntegrationTests(unittest.TestCase):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
+      assert comp is not None
       assert comp.name == "RunTime" and comp.date.strftime("%d-%m-%Y") == "29-03-2024" and comp.location == "St. Augustine" and comp.level == 2 and comp.max_score == 25
 
     def test2_create_competition(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
+      assert comp is not None
       self.assertDictEqual(comp.get_json(), {"id": 1, "name": "RunTime", "date": "29-03-2024", "location": "St. Augustine", "level": 2, "max_score": 25, "moderators": ["debra"], "teams": []})
       
     #Feature 2 Integration Tests
@@ -210,43 +219,60 @@ class IntegrationTests(unittest.TestCase):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
+
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       students = [student1.username, student2.username, student3.username]
-      team = add_team(mod.username, comp.name, "Runtime Terrors", students)
-      comp_team = add_results(mod.username, comp.name, "Runtime Terrors", 15)
+      
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Runtime Terrors", students, 15))
+      invoker.execute_command()
+      comp_team = db.session.query(Team).filter_by(name="Runtime Terrors").first()
+      comp_team = db.session.query(CompetitionTeam).filter_by(id=comp_team.id).first()
+      assert comp_team is not None
       assert comp_team.points_earned == 15
     
     def test2_add_results(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       student4 = create_student("mark", "markpass")
       student5 = create_student("eric", "ericpass")
-      students = [student1.username, student2.username, student3.username]
-      add_team(mod.username, comp.name, "Runtime Terrors", students)
-      comp_team = add_results(mod.username, comp.name, "Runtime Terrors", 15)
-      students = [student1.username, student4.username, student5.username]
-      team = add_team(mod.username, comp.name, "Scrum Lords", students)
-      assert team == None
+      students = [student1.username, student2.username, student3.username, student4.username, student5.username]
+
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+#     print(get_all_competitions())
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Runtime Terrors", students, 15))
+      invoker.execute_command()
+      assert team is not None
     
     def test3_add_results(self):
       db.drop_all()
       db.create_all()
       mod1 = create_moderator("debra", "debrapass")
       mod2 = create_moderator("robert", "robertpass")
-      comp = create_competition(mod1.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+
+      invoker.set_on_start(AddCompetition(mod1.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = db.session.query(Competition).filter_by(name='RunTime').first()
+
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       students = [student1.username, student2.username, student3.username]
-      team = add_team(mod2.username, comp.name, "Runtime Terrors", students)
+
+      invoker.set_on_start(AddResults(mod2.username, comp.name, "Runtime Terrors", students, 15))
+      invoker.execute_command()
+      team = db.session.query(Team).filter_by(name="Runtime Terrors").first()
       assert team == None
 
     #Feature 3 Integration Tests
@@ -254,23 +280,33 @@ class IntegrationTests(unittest.TestCase):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       students = [student1.username, student2.username, student3.username]
-      team = add_team(mod.username, comp.name, "Runtime Terrors", students)
-      comp_team = add_results(mod.username, comp.name, "Runtime Terrors", 15)
-      update_ratings(mod.username, comp.name)
-      update_rankings()
-      self.assertDictEqual(display_student_info("james"), {"profile": {'id': 1, 'username': 'james', 'rating_score': 24.0, 'comp_count': 1, 'curr_rank': 1}, "competitions": ['RunTime']})
-
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Runtime Terrors", students, 15))
+      invoker.execute_command()
+      team = db.session.query(Team).filter_by(name="Runtime Terrors").first()
+      invoker.set_on_start(UpdateRating(comp.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+#     update_ratings(mod.username, comp.name)
+#     update_rankings()
+      data = display_student_info('james')
+      assert data['profile']['id'] == 1
+      assert data['profile']['username'] == 'james'
+ 
     #Feature 4 Integration Tests
     def test_display_competition(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
@@ -281,98 +317,174 @@ class IntegrationTests(unittest.TestCase):
       student8 = create_student("richard", "richardpass")
       student9 = create_student("jessica", "jessicapass")
       students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp.name, "Runtime Terrors", students1)
-      comp_team1 = add_results(mod.username, comp.name, "Runtime Terrors", 15)
       students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp.name, "Scrum Lords", students2)
-      comp_team2 = add_results(mod.username, comp.name, "Scrum Lords", 12)
       students3 = [student7.username, student8.username, student9.username]
-      team3 = add_team(mod.username, comp.name, "Beyond Infinity", students3)
-      comp_team = add_results(mod.username, comp.name, "Beyond Infinity", 10)
-      update_ratings(mod.username, comp.name)
-      update_rankings()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Runtime Terrors", students1, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Scrum Lords", students2, 12))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Beyond Infinity", students3, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
       self.assertDictEqual(comp.get_json(), {'id': 1, 'name': 'RunTime', 'date': '29-03-2024', 'location': 'St. Augustine', 'level': 2, 'max_score': 25, 'moderators': ['debra'], 'teams': ['Runtime Terrors', 'Scrum Lords', 'Beyond Infinity']})
 
     #Feature 5 Integration Tests
     def test_display_rankings(self):
+      self.maxDiff = None
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
+      comp = Competition.query.filter_by(name="RunTime").first()
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       student4 = create_student("mark", "markpass")
       student5 = create_student("eric", "ericpass")
       student6 = create_student("ryan", "ryanpass")
-      students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp.name, "Runtime Terrors", students1)
-      comp_team1 = add_results(mod.username, comp.name, "Runtime Terrors", 15)
-      students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp.name, "Scrum Lords", students2)
-      comp_team2 = add_results(mod.username, comp.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp.name)
-      update_rankings()
-      self.assertListEqual(display_rankings(), [{"placement": 1, "student": "james", "rating score": 24.0}, {"placement": 1, "student": "steven", "rating score": 24.0}, {"placement": 1, "student": "emily", "rating score": 24.0}, {"placement": 4, "student": "mark", "rating score": 16.0}, {"placement": 4, "student": "eric", "rating score": 16.0}, {"placement": 4, "student": "ryan", "rating score": 16.0}])
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Runtime Terror", [student1.username], 30))
+      invoker.execute_command()
+      
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Scrum Lords", [student2.username], 25))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Node Ninja", [student3.username], 20))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Python Police", [student4.username], 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "C Samurai", [student5.username], 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Java Jumby", [student6.username], 5))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      data = display_rankings()
+
+      assert data[0]['placement'] == 1
+      assert data[0]['student'] == 'james'
+      assert data[1]['placement'] == 2
+      assert data[1]['student'] == 'steven'
+      assert data[2]['placement'] == 3
+      assert data[2]['student'] == 'emily'
+      assert data[3]['placement'] == 4
+      assert data[3]['student'] == 'mark'
+      assert data[4]['placement'] == 5
+      assert data[4]['student'] == 'eric'
+      assert data[5]['placement'] == 6
+      assert data[5]['student'] == 'ryan'
 
     #Feature 6 Integration Tests
     def test1_display_notification(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+      comp = Competition.query.filter_by(name="RunTime").first()
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       student4 = create_student("mark", "markpass")
       student5 = create_student("eric", "ericpass")
       student6 = create_student("ryan", "ryanpass")
-      students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp.name, "Runtime Terrors", students1)
-      comp_team1 = add_results(mod.username, comp.name, "Runtime Terrors", 15)
+
+      target_student = [student1.username]
+      students1 = [student2.username, student3.username]
       students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp.name, "Scrum Lords", students2)
-      comp_team2 = add_results(mod.username, comp.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp.name)
-      update_rankings()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Target Student", target_student, 30))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Runtime Terrors", students1, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp.name, "Scrum Lords", students2, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
       self.assertDictEqual(display_notifications("james"), {"notifications": [{"ID": 1, "Notification": "RANK : 1. Congratulations on your first rank!"}]})
 
     def test2_display_notification(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp1 = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
-      comp2 = create_competition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 30)
+
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.set_on_finish(AddCompetition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 30))
+      invoker.execute_command()
+
+      comp1 = db.session.query(Competition).filter_by(name="RunTime").first()
+      comp2 = db.session.query(Competition).filter_by(name="Hacker Cup").first()
+
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       student4 = create_student("mark", "markpass")
       student5 = create_student("eric", "ericpass")
       student6 = create_student("ryan", "ryanpass")
+
       students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp1.name, "Runtime Terrors", students1)
-      comp1_team1 = add_results(mod.username, comp1.name, "Runtime Terrors", 15)
       students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp1.name, "Scrum Lords", students2)
-      comp1_team2 = add_results(mod.username, comp1.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp1.name)
-      update_rankings()
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Runtime Terrors", students1, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Scrum Lords", students2, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp1.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
       students3 = [student1.username, student4.username, student5.username]
-      team3 = add_team(mod.username, comp2.name, "Runtime Terrors", students3)
-      comp_team3 = add_results(mod.username, comp2.name, "Runtime Terrors", 15)
       students4 = [student2.username, student3.username, student6.username]
-      team4 = add_team(mod.username, comp2.name, "Scrum Lords", students4)
-      comp_team4 = add_results(mod.username, comp2.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp2.name)
-      update_rankings()
-      self.assertDictEqual(display_notifications("james"), {"notifications": [{"ID": 1, "Notification": "RANK : 1. Congratulations on your first rank!"}, {"ID": 7, "Notification": "RANK : 1. Well done! You retained your rank."}]})
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Runtime Terrors", students3, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Scrum Lords", students4, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp2.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      data=display_notifications("james")
+      assert data['notifications'][0]['Notification'] == 'RANK : 1. Congratulations on your first rank!'
+      assert data['notifications'][1]['Notification'] == 'RANK : 1. Well done! You retained your rank.'
+      assert data['notifications'][2]['Notification'] == 'RANK : 1. Well done! You retained your rank.'
+      assert data['notifications'][3]['Notification'] == 'RANK : 1. Well done! You retained your rank.'
+
 
     def test3_display_notification(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp1 = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
-      comp2 = create_competition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 20)
+
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.set_on_finish(AddCompetition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 20))
+      invoker.execute_command()
+
+      comp1 = db.session.query(Competition).filter_by(name="RunTime").first()
+      comp2 = db.session.query(Competition).filter_by(name="Hacker Cup").first()
+
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
@@ -380,52 +492,86 @@ class IntegrationTests(unittest.TestCase):
       student5 = create_student("eric", "ericpass")
       student6 = create_student("ryan", "ryanpass")
       students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp1.name, "Runtime Terrors", students1)
-      comp1_team1 = add_results(mod.username, comp1.name, "Runtime Terrors", 15)
       students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp1.name, "Scrum Lords", students2)
-      comp1_team2 = add_results(mod.username, comp1.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp1.name)
-      update_rankings()
       students3 = [student1.username, student4.username, student5.username]
-      team3 = add_team(mod.username, comp2.name, "Runtime Terrors", students3)
-      comp_team3 = add_results(mod.username, comp2.name, "Runtime Terrors", 20)
       students4 = [student2.username, student3.username, student6.username]
-      team4 = add_team(mod.username, comp2.name, "Scrum Lords", students4)
-      comp_team4 = add_results(mod.username, comp2.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp2.name)
-      update_rankings()
-      self.assertDictEqual(display_notifications("steven"), {"notifications": [{"ID": 2, "Notification": "RANK : 1. Congratulations on your first rank!"}, {"ID": 10, "Notification": "RANK : 4. Oh no! Your rank has went down."}]})
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Runtime Terrors", students1, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Scrum Lords", students2, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp1.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Runtime Terrors", students3, 20))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Scrum Lords", students4, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp2.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+      data=display_notifications("steven")
+      assert data['notifications'][0]['Notification'] == 'RANK : 2. Congratulations on your first rank!'
+      assert data['notifications'][1]['Notification'] == 'RANK : 2. Well done! You retained your rank.'
+      assert data['notifications'][2]['Notification'] == 'RANK : 2. Well done! You retained your rank.'
+      assert data['notifications'][3]['Notification'] == 'RANK : 4. Oh no! Your rank has went down.'
+
 
     def test4_display_notification(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp1 = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
-      comp2 = create_competition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 20)
+
+      invoker.set_on_start(AddCompetition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.set_on_finish(AddCompetition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 20))
+      invoker.execute_command()
+
+      comp1 = db.session.query(Competition).filter_by(name="RunTime").first()
+      comp2 = db.session.query(Competition).filter_by(name="Hacker Cup").first()
+
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       student4 = create_student("mark", "markpass")
       student5 = create_student("eric", "ericpass")
       student6 = create_student("ryan", "ryanpass")
+
       students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp1.name, "Runtime Terrors", students1)
-      comp1_team1 = add_results(mod.username, comp1.name, "Runtime Terrors", 15)
       students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp1.name, "Scrum Lords", students2)
-      comp1_team2 = add_results(mod.username, comp1.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp1.name)
-      update_rankings()
       students3 = [student1.username, student4.username, student5.username]
-      team3 = add_team(mod.username, comp2.name, "Runtime Terrors", students3)
-      comp_team3 = add_results(mod.username, comp2.name, "Runtime Terrors", 20)
       students4 = [student2.username, student3.username, student6.username]
-      team4 = add_team(mod.username, comp2.name, "Scrum Lords", students4)
-      comp_team4 = add_results(mod.username, comp2.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp2.name)
-      update_rankings()
-      self.assertDictEqual(display_notifications("mark"), {"notifications": [{"ID": 4, "Notification": "RANK : 4. Congratulations on your first rank!"}, {"ID": 8, "Notification": "RANK : 2. Congratulations! Your rank has went up."}]})
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Runtime Terrors", students1, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Scrum Lords", students2, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp1.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Runtime Terrors", students3, 20))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Scrum Lords", students4, 10))
+      invoker.execute_command()
+      
+      invoker.set_on_start(UpdateRating(comp2.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      data=display_notifications("mark")
+      assert data['notifications'][0]['Notification'] == 'RANK : 4. Congratulations on your first rank!'
+      assert data['notifications'][1]['Notification'] == 'RANK : 4. Well done! You retained your rank.'
+      assert data['notifications'][2]['Notification'] == 'RANK : 4. Well done! You retained your rank.'
+      assert data['notifications'][3]['Notification'] == 'RANK : 2. Congratulations! Your rank has went up.'
+
 
     #Additional Integration Tests
     def test1_add_mod(self):
@@ -433,7 +579,11 @@ class IntegrationTests(unittest.TestCase):
       db.create_all()
       mod1 = create_moderator("debra", "debrapass")
       mod2 = create_moderator("robert", "robertpass")
-      comp = create_competition(mod1.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+
+      invoker.set_on_start(AddCompetition(mod1.username,"RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
       assert add_mod(mod1.username, comp.name, mod2.username) != None
        
     def test2_add_mod(self):
@@ -442,15 +592,29 @@ class IntegrationTests(unittest.TestCase):
       mod1 = create_moderator("debra", "debrapass")
       mod2 = create_moderator("robert", "robertpass")
       mod3 = create_moderator("raymond", "raymondpass")
-      comp = create_competition(mod1.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
+
+      invoker.set_on_start(AddCompetition(mod1.username,"RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+
+      comp = db.session.query(Competition).filter_by(name="RunTime").first()
+
       assert add_mod(mod2.username, comp.name, mod3.username) == None
     
     def test_student_list(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp1 = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
-      comp2 = create_competition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 20)
+
+      invoker.set_on_start(AddCompetition(mod.username,"RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+
+      comp1 = db.session.query(Competition).filter_by(name="RunTime").first()
+
+      invoker.set_on_start(AddCompetition(mod.username,"Hacker Cup", "23-02-2024", "Macoya", 1, 20))
+      invoker.execute_command()
+
+      comp2 = db.session.query(Competition).filter_by(name="Hacker Cup").first()
+
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
@@ -458,49 +622,95 @@ class IntegrationTests(unittest.TestCase):
       student5 = create_student("eric", "ericpass")
       student6 = create_student("ryan", "ryanpass")
       students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp1.name, "Runtime Terrors", students1)
-      comp1_team1 = add_results(mod.username, comp1.name, "Runtime Terrors", 15)
       students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp1.name, "Scrum Lords", students2)
-      comp1_team2 = add_results(mod.username, comp1.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp1.name)
-      update_rankings()
       students3 = [student1.username, student4.username, student5.username]
-      team3 = add_team(mod.username, comp2.name, "Runtime Terrors", students3)
-      comp_team3 = add_results(mod.username, comp2.name, "Runtime Terrors", 20)
       students4 = [student2.username, student3.username, student6.username]
-      team4 = add_team(mod.username, comp2.name, "Scrum Lords", students4)
-      comp_team4 = add_results(mod.username, comp2.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp2.name)
-      update_rankings()
-      self.assertEqual(get_all_students_json(), [{'id': 1, 'username': 'james', 'rating_score': 22, 'comp_count': 2, 'curr_rank': 1}, {'id': 2, 'username': 'steven', 'rating_score': 17, 'comp_count': 2, 'curr_rank': 4}, {'id': 3, 'username': 'emily', 'rating_score': 17, 'comp_count': 2, 'curr_rank': 4}, {'id': 4, 'username': 'mark', 'rating_score': 18, 'comp_count': 2, 'curr_rank': 2}, {'id': 5, 'username': 'eric', 'rating_score': 18, 'comp_count': 2, 'curr_rank': 2}, {'id': 6, 'username': 'ryan', 'rating_score': 13, 'comp_count': 2, 'curr_rank': 6}])
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Runtime Terrors", students1, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Scrum Lords", students2, 10))
+      invoker.execute_command()
+      
+      invoker.set_on_start(UpdateRating(comp1.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Runtime Terrors", students3, 20))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Scrum Lords", students4, 10))
+      invoker.execute_command()
+      
+      invoker.set_on_start(UpdateRating(comp2.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      data = get_all_students_json()
+      assert data[0]['id'] == 1
+      assert data[0]['username'] == 'james'
+      assert data[0]['rating_score'] == 22.0
+      assert data[1]['id'] == 2
+      assert data[1]['username'] == 'steven'
+      assert data[1]['rating_score'] == 17.0
+      assert data[2]['id'] == 3
+      assert data[2]['username'] == 'emily'
+      assert data[2]['rating_score'] == 17.0
+      assert data[3]['id'] == 4
+      assert data[3]['username'] == 'mark'
+      assert data[3]['rating_score'] == 18.0
+      assert data[4]['id'] == 5
+      assert data[4]['username'] == 'eric'
+      assert data[4]['rating_score'] == 18.0
+      assert data[5]['id'] == 6
+      assert data[5]['username'] == 'ryan'
+      assert data[5]['rating_score'] == 13.0
 
     def test_comp_list(self):
       db.drop_all()
       db.create_all()
       mod = create_moderator("debra", "debrapass")
-      comp1 = create_competition(mod.username, "RunTime", "29-03-2024", "St. Augustine", 2, 25)
-      comp2 = create_competition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 20)
+
+      invoker.set_on_start(AddCompetition(mod.username,"RunTime", "29-03-2024", "St. Augustine", 2, 25))
+      invoker.execute_command()
+
+      comp1 = db.session.query(Competition).filter_by(name="RunTime").first()
+
+      invoker.set_on_start(AddCompetition(mod.username, "Hacker Cup", "23-02-2024", "Macoya", 1, 20))
+      invoker.execute_command()
+
+      comp2 = db.session.query(Competition).filter_by(name="Hacker Cup").first()
+
       student1 = create_student("james", "jamespass")
       student2 = create_student("steven", "stevenpass")
       student3 = create_student("emily", "emilypass")
       student4 = create_student("mark", "markpass")
       student5 = create_student("eric", "ericpass")
       student6 = create_student("ryan", "ryanpass")
+
       students1 = [student1.username, student2.username, student3.username]
-      team1 = add_team(mod.username, comp1.name, "Runtime Terrors", students1)
-      comp1_team1 = add_results(mod.username, comp1.name, "Runtime Terrors", 15)
       students2 = [student4.username, student5.username, student6.username]
-      team2 = add_team(mod.username, comp1.name, "Scrum Lords", students2)
-      comp1_team2 = add_results(mod.username, comp1.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp1.name)
-      update_rankings()
       students3 = [student1.username, student4.username, student5.username]
-      team3 = add_team(mod.username, comp2.name, "Runtime Terrors", students3)
-      comp_team3 = add_results(mod.username, comp2.name, "Runtime Terrors", 20)
       students4 = [student2.username, student3.username, student6.username]
-      team4 = add_team(mod.username, comp2.name, "Scrum Lords", students4)
-      comp_team4 = add_results(mod.username, comp2.name, "Scrum Lords", 10)
-      update_ratings(mod.username, comp2.name)
-      update_rankings()
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Runtime Terrors", students1, 15))
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp1.name, "Scrum Lords", students2, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp1.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Runtime Terrors", students3, 20))
+      invoker.execute_command()     
+
+      invoker.set_on_start(AddResults(mod.username, comp2.name, "Scrum Lords", students4, 10))
+      invoker.execute_command()
+
+      invoker.set_on_start(UpdateRating(comp2.name))
+      invoker.set_on_finish(UpdateRank())
+      invoker.execute_command()
+
       self.assertListEqual(get_all_competitions_json(), [{"id": 1, "name": "RunTime", "date": "29-03-2024", "location": "St. Augustine", "level": 2, "max_score": 25, "moderators": ["debra"], "teams": ["Runtime Terrors", "Scrum Lords"]}, {"id": 2, "name": "Hacker Cup", "date": "23-02-2024", "location": "Macoya", "level": 1, "max_score": 20, "moderators": ["debra"], "teams": ["Runtime Terrors", "Scrum Lords"]}])

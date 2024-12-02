@@ -3,7 +3,10 @@ from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import login_required, login_user, current_user, logout_user
 from App.models import db
 from App.controllers import *
+from App.controllers.commands import *
 import csv
+
+invoker = CommandInvoker()
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
@@ -121,10 +124,12 @@ def init():
 
     #creates competitions
     with open("competitions.csv") as competition_file:
+        invoker = CommandInvoker()
         reader = csv.DictReader(competition_file)
 
         for competition in reader:
-            comp = create_competition(competition['mod_name'], competition['comp_name'], competition['date'], competition['location'], competition['level'], competition['max_score'])
+            invoker.set_on_start(AddCompetition(competition['mod_name'], competition['comp_name'], competition['date'], competition['location'], competition['level'], competition['max_score']))
+            invoker.execute_command()
     
     competition_file.close()
     
@@ -133,8 +138,11 @@ def init():
 
         for result in reader:
             students = [result['student1'], result['student2'], result['student3']]
-            team = add_team(result['mod_name'], result['comp_name'], result['team_name'], students)
-            add_results(result['mod_name'], result['comp_name'], result['team_name'], int(result['score']))
+            #team = add_team(result['mod_name'], result['comp_name'], result['team_name'], students)
+            #add_results(result['mod_name'], result['comp_name'], result['team_name'], int(result['score']))
+            invoker.set_on_start(AddResults(result['mod_name'], result['comp_name'],  result['team_name'], students, int(result['score'])))
+            invoker.execute_command()
+
             #db.session.add(comp)
         #db.session.commit()
     
@@ -145,8 +153,12 @@ def init():
 
         for competition in reader:
             if competition['comp_name'] != 'TopCoder':
-                update_ratings(competition['mod_name'], competition['comp_name'])
-                update_rankings()
+                #update_ratings(competition['mod_name'], competition['comp_name'])
+                #update_rankings()
+                invoker.set_on_start(UpdateRating(competition))
+                invoker.set_on_finish(UpdateRank())
+                invoker.execute_command()
+
             #db.session.add(comp)
         #db.session.commit()
     
@@ -313,10 +325,12 @@ def init_postman():
 
     #creates competitions
     with open("competitions.csv") as competition_file:
+        invoker = CommandInvoker()
         reader = csv.DictReader(competition_file)
 
         for competition in reader:
-            comp = create_competition(competition['mod_name'], competition['comp_name'], competition['date'], competition['location'], competition['level'], competition['max_score'])
+            invoker.set_on_start(AddCompetition(competition['mod_name'], competition['comp_name'], competition['date'], competition['location'], competition['level'], competition['max_score']))
+            invoker.execute_command()
     
     competition_file.close()
     
