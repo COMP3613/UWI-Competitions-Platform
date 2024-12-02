@@ -11,6 +11,7 @@ from App.controllers.commands import *
 from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import *
+from App.models import Command
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -50,10 +51,13 @@ def initialize():
     # creates competitions
     with open("competitions.csv") as competition_file:
         reader = csv.DictReader(competition_file)
-
+        invoker = CommandInvoker()
+        
         for competition in reader:
-            comp = create_competition(competition['mod_name'], competition['comp_name'], competition['date'],
-                                      competition['location'], competition['level'], competition['max_score'])
+            invoker.set_on_start(AddCompetition(competition['mod_name'], competition['comp_name'], competition['date'],
+                                      competition['location'], competition['level'], competition['max_score']))
+            invoker.execute_command()
+            
 
     competition_file.close()
 
@@ -256,7 +260,10 @@ comp_cli = AppGroup("comp", help = "Competition commands")
 @click.argument("level", default = 1)
 @click.argument("max_score", default = 25)
 def create_competition_command(mod_name, name, date, location, level, max_score):
-    comp = create_competition(mod_name, name, date, location, level, max_score)
+    invoker = CommandInvoker()
+    invoker.set_on_start(AddCompetition(mod_name, name, date, location, level, max_score))
+    invoker.execute_command()
+#   comp = create_competition(mod_name, name, date, location, level, max_score)
 
 @comp_cli.command("details", help = "Displays competition details")
 @click.argument("name", default = "comp1")
