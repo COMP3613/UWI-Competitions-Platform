@@ -6,6 +6,8 @@ from flask_login import current_user, login_required
 from.index import index_views
 
 from App.controllers import *
+from App.controllers.commands import *
+from App.models import *
 
 comp_views = Blueprint('comp_views', __name__, template_folder='../templates')
 
@@ -39,7 +41,10 @@ def create_comp():
     date = data['date']
     date = date[8] + date[9] + '-' + date[5] + date[6] + '-' + date[0] + date[1] + date[2] + date[3]
     
-    response = create_competition(moderator.username, data['name'], date, data['location'], data['level'], data['max_score'])
+    invoker = CommandInvoker()
+    invoker.set_on_start(AddCompetition(moderator.username, data['name'], date, data['location'], data['level'], data['max_score']))
+    invoker.execute_command()
+
     return render_template('competitions.html', competitions=get_all_competitions(), user=current_user)
     #return (jsonify({'message': "Competition created!"}), 201)
     #return (jsonify({'error': "Error creating competition"}),500)

@@ -49,3 +49,34 @@ class UpdateRating(Command):
         db.session.add(competition)
         db.session.commit()
 
+class AddCompetition(Command):
+    def __init__(self, mod_name, comp_name, date, location, level, max_score):
+        self.name = comp_name
+        self.date = date
+        self.location = location
+        self.level = level
+        self.max_score = max_score
+        self.mod = mod_name
+
+    def execute(self):
+        comp = get_competition_by_name(self.name)
+        if comp:
+            print(f'{self.name} already exists!')
+            return None
+        
+        mod = Moderator.query.filter_by(username = self.mod).first()
+        if mod:
+            newComp = Competition(name=self.name, date=datetime.strptime(self.date, "%d-%m-%Y"), location=self.location, level=self.level, max_score=self.max_score)
+            try:
+                newComp.add_mod(mod)
+                db.session.add(newComp)
+                db.session.commit()
+                print(f'New Competition: {self.name} created!')
+                return newComp
+            except Exception as e:
+                db.session.rollback()
+                print("Something went wrong!")
+                return None
+        else:
+            print("Invalid credentials!")
+    
