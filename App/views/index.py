@@ -184,7 +184,8 @@ def profile():
 def student_profile(id):
     student = get_student(id)
     if not student:
-        return render_template('404.html')
+        return render_template('student_profile.html', student=None, competitions=None, user=current_user,historical_data=None, id = id)
+
     history = get_historical_ranking(student)
     profile_info = display_student_info(student.username)
     competitions = profile_info['competitions']

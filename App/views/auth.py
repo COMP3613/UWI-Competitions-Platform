@@ -90,7 +90,7 @@ def login():
             #else:
             #flash("Invalid Credentials!", category='error')
             #return render_template('login.html', user=current_user)
-        
+
         if moderator:
             if request.form['username'] == moderator.username and moderator.check_password(request.form['password']):
                 login_user(moderator)
@@ -104,6 +104,10 @@ def login():
             #if not student and not moderator:
             #flash("Username not found!", category='error')
             #return render_template('404.html')
+
+        if not student and not moderator:
+            return render_template('login.html', user=current_user, message = 'Invalid credentials.')
+            
     return render_template('login.html', user=current_user)
 
 @auth_views.route('/logout')
