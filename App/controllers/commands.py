@@ -1,6 +1,6 @@
 from App.models import Command
 from App.controllers import *
-from App.models import Competition, Team , CompetitionTeam
+from App.models import Competition, Team , CompetitionTeam, Notification , Moderator
 from App.database import db
 
 

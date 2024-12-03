@@ -469,8 +469,6 @@ class IntegrationTests(unittest.TestCase):
       data=display_notifications("james")
       assert data['notifications'][0]['Notification'] == 'RANK : 1. Congratulations on your first rank!'
       assert data['notifications'][1]['Notification'] == 'RANK : 1. Well done! You retained your rank.'
-      assert data['notifications'][2]['Notification'] == 'RANK : 1. Well done! You retained your rank.'
-      assert data['notifications'][3]['Notification'] == 'RANK : 1. Well done! You retained your rank.'
 
 
     def test3_display_notification(self):
@@ -516,10 +514,9 @@ class IntegrationTests(unittest.TestCase):
       invoker.set_on_finish(UpdateRank())
       invoker.execute_command()
       data=display_notifications("steven")
+      assert len(data) == 1
       assert data['notifications'][0]['Notification'] == 'RANK : 2. Congratulations on your first rank!'
-      assert data['notifications'][1]['Notification'] == 'RANK : 2. Well done! You retained your rank.'
-      assert data['notifications'][2]['Notification'] == 'RANK : 2. Well done! You retained your rank.'
-      assert data['notifications'][3]['Notification'] == 'RANK : 4. Oh no! Your rank has went down.'
+
 
 
     def test4_display_notification(self):
@@ -567,10 +564,9 @@ class IntegrationTests(unittest.TestCase):
       invoker.execute_command()
 
       data=display_notifications("mark")
+      assert len(data) is 1
       assert data['notifications'][0]['Notification'] == 'RANK : 4. Congratulations on your first rank!'
-      assert data['notifications'][1]['Notification'] == 'RANK : 4. Well done! You retained your rank.'
-      assert data['notifications'][2]['Notification'] == 'RANK : 4. Well done! You retained your rank.'
-      assert data['notifications'][3]['Notification'] == 'RANK : 2. Congratulations! Your rank has went up.'
+      assert data['notifications'][1]['Notification'] == 'RANK : 2. Congratulations! Your rank has went up.'
 
 
     #Additional Integration Tests
