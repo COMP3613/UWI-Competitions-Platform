@@ -5,42 +5,35 @@
 {{ super() }}
 
 {% block content %}
-<center>
-  <h2 style="color: white;">Competition Registration</h2>
-</center>
 
-<main class="container" style="padding: 15px; background-color: black; border-radius: 25px;">
-  <form name="addForm" class="card" method="POST" action="/createcompetition" style="background-color: black; color: white;">
-    <div class="card-content" style="font-family: helvetica;">
-      <span class="card-title" style="font-family: optima;">Create Competition</span>
-        <div class="input-field">
-          <input style="color: white;" type="text" name="name" placeholder="Enter Comp Name" class="materialize-textarea" required>
-          <label for="name">Competition Name</label>
-        </div>
-        <div class="input-field">
-          <input style="color: white;" type="date" name="date" style="color: white;" required>
-          <label for="date">Competition Date</label>
-        </div>
-        <div class="input-field">
-            <input style="color: white;" type="text" name="location" placeholder="Enter Comp Location" class="materialize-textarea" required>
-            <label for="location">Competition Location</label>
-        </div>
-        <div class="input-field">
-            <input style="color: white;" type="number" name="level" placeholder="Enter Comp Level" min="1" max="5">
-            <label for="level">Competition Level</label>
-        </div>
-        <div class="input-field">
-            <input style="color: white;" type="text" name="max_score" placeholder="Enter Max Value" class="materialize-textarea" required>
-            <label for="max_score">Competition Max Value</label>
-          </div>
 
+<main class="container px-4 mt-16 sm:px-6 lg:px-8 py-6 bg-[#2c4f66] rounded-xl mx-auto max-w-3xl">
+  <form name="addForm" method="POST" action="/createcompetition" class="bg-[#2c4f66] text-white p-6 rounded-xl">
+    <div class="space-y-6">
+      <span class="text-2xl mx-auto justify-center flex font-bold text-white">Create Competition</span>
+      <div class="flex flex-col">
+        <label for="name" class="text-white font-semibold">Competition Name</label>
+        <input type="text" name="name" placeholder="Comp Name" class="bg-transparent border-b-2 border-[#C5D7E1] text-white p-2 mt-2 focus:outline-none focus:border-[#90b1cf]" required>
+      </div>
+      <div class="flex flex-col">
+        <label for="date" class="text-white font-semibold">Competition Date</label>
+        <input type="date" name="date" class="bg-transparent border-b-2 border-[#C5D7E1] text-white p-2 mt-2 focus:outline-none focus:border-[#90b1cf]" required>
+      </div>
+      <div class="flex flex-col">
+        <label for="location" class="text-white font-semibold">Competition Location</label>
+        <input type="text" name="location" placeholder="Comp Location" class="bg-transparent border-b-2 border-[#C5D7E1] text-white p-2 mt-2 focus:outline-none focus:border-[#90b1cf]" required>
+      </div>
+      <div class="flex flex-col">
+        <label for="level" class="text-white font-semibold">Competition Level</label>
+        <input type="number" name="level" placeholder="Comp Level" min="1" max="5" class="bg-transparent border-b-2 border-[#C5D7E1] text-white p-2 mt-2 focus:outline-none focus:border-[#90b1cf]">
+      </div>
+      <div class="flex flex-col">
+        <label for="max_score" class="text-white font-semibold">Competition Max Value</label>
+        <input type="text" name="max_score" placeholder="Max Value" class="bg-transparent border-b-2 border-[#C5D7E1] text-white p-2 mt-2 focus:outline-none focus:border-[#90b1cf]" required>
+      </div>
     </div>
-    <div class="card-actions">
-        <div class="row">
-          <div class="col s12">
-            <input style="background-color: #343A40; border-radius: 25px;" type="submit" class="btn right" value="Create Competition">
-          </div>
-        </div>
+    <div class="mt-6">
+      <input type="submit" class="bg-black rounded-xl text-white py-2 px-6 hover:bg-[#90b1cf] cursor-pointer transition-all" value="Create Competition">
     </div>
   </form>
 </main>

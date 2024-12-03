@@ -1,93 +1,43 @@
-{% extends "layout.html" %} {% block title %}Competitions{% endblock %} {% block
-page %}UWI Competitions Platform{% endblock %} {{ super() }} {% block content %}
+{% extends "layout.html" %}
+{% block title %}Competitions{% endblock %}
+{% block page %}UWI Competitions Platform{% endblock %}
+{{ super() }}
+{% block content %}
 
-<!-- <style>
 
-    *{
-        /* margin: 0px; */
-        padding: 0px;
-        box-sizing: border-box;
-        /* font-family: sans-serif; */
-    }
-
-    .competitions-card{
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        /* margin-top: 100px; */
-    }
-
-    .card{
-        width: 325px;
-        /* background-color: #f0f0f0; */
-        /* border: 1px solid #ccc; */
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
-        margin: 20px;
-        padding: 16px;
-        color: black;
-        transition: box-shadow 0.3s;
-       /*  font-size: 28px;
-        margin-bottom: 8px; */
-    }
-
-    .card:hover {
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    }
-
-    .card a {
-        text-decoration: none;
-        color: black;
-        display: block;
-    } -->
-<!-- 
-/* .card p{ color: #666; font-size: 15px; line-height: 1.3; } */ -->
-<!-- </style> -->
-
-<div class="flex flex-row min-h-screen px-8">
-  <div class="flex-row text-xl text-white">Competitions</div>
-  <!-- <div>
-        <center><h2 style="margin-left: 50px; color: white;">Competitions</h2></center>
-    </div>
+<div class="flex flex-row px-8 py-6 bg-[#003554] text-[#C5D7E1]">
     {% if session['user_type'] == 'moderator' %}
-    <div>
-        <button type="button" style="padding: 5px; margin-left: 50px; margin-top: 50px; background-color: black; height: 35px; border-radius: 15px; font-family: helvetica;">
-            <a style="color: white;" href="{{url_for('comp_views.create_comp_page')}}">Create Competition</a>
+    <div class="ml-auto mt-4">
+        <button type="button" class="bg-[#003554] text-white rounded-lg px-4 py-2 border-2 border-[#90b1cf] hover:bg-black  hover:border-white">
+            <a href="{{url_for('comp_views.create_comp_page')}}">Create Competition</a>
         </button>
     </div>
     {% endif %}
 </div>
 
-
-<div class="competitions-card">
-    
+<div class="competitions-card  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-8 py-6">
     {% for competition in competitions[::-1] %}
-        
-        <div class="card" style="background-color: black; color: white; font-family: helvetica;">
-            <a style="color: white;" href="{{url_for('comp_views.competition_details', id=competition.id)}}">
-                <center>
-                    <div style="padding-bottom: 15px; padding-top: 10px; outline: solid white; background-color: #343A40;">
-                        <h3 style="color: white; font-family: optima;">{{competition.name}}</h3>
-                    </div>
-                </center>
-                <div>
-                    <p><strong>Date: </strong>{{competition.date.strftime("%d %B %Y")}}</p>
-                    <p><strong>Location: </strong>{{competition.location}}</p>
-                    <p><strong>Level: </strong>{{competition.level}}</p>
-                    <p><strong>Max Score: </strong>{{competition.max_score}}</p>
-                    <p><strong>Moderators: </strong>
+    <div class="card bg-[#C5D7E1] text-black rounded-lg shadow-lg p-4 hover:bg-black hover:text-white">
+        <a class="block" href="{{url_for('comp_views.competition_details', id=competition.id)}}">
+            <div class="text-center py-4 px-2 border-b-2 border-[#90b1cf] mb-4">
+                <h3 class="text-xl font-semibold">{{competition.name}}</h3>
+            </div>
+            <div class="">
+                <p><strong>Date: </strong>{{competition.date.strftime("%d %B %Y")}}</p>
+                <p><strong>Location: </strong>{{competition.location}}</p>
+                <p><strong>Level: </strong>{{competition.level}}</p>
+                <p><strong>Max Score: </strong>{{competition.max_score}}</p>
+                <p><strong>Moderators: </strong>
                     {% for moderator in competition.moderators %}
-                        <a style="color: white" href="{{url_for('index_views.moderator_profile', id=moderator.id)}}">
-                            <p>{{moderator.username}}</p>
+                        <a class="" href="{{url_for('index_views.moderator_profile', id=moderator.id)}}">
+                            <span>{{moderator.username}}</span>
                         </a>
                     {% endfor %}
-                    </p> 
-                </div>
-            </a>
-        </div> -->
-
-  {% endfor %}
+                </p>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}

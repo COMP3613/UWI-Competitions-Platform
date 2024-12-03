@@ -12,7 +12,6 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
-    <!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">-->
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -20,36 +19,48 @@
     />
   </head>
 
-  <body class="">
-    <div class="nav-large items-center py-6 bg-[#051923] text-white flex-row">
-      <div class="links lg:px-[8vw]">
-        <div class="hidden md:flex justify-between">
-          <div class="flex font-medium items-center space-x-16">
-            <a href="/" class="text-4xl font-bold">UWI Competitions Platform</a>
-            <a href="/leaderboard" class="p-2 rounded-md">Leaderboard</a>
-            <a href="/competitions" class="p-2 rounded-md">Competitions</a>
+  <body class="bg-[#003554] font-roboto">
+
+    <!-- Navbar -->
+    <div class="bg-[#051923] text-white py-4 px-6">
+      <div class="max-w-screen-xl mx-auto flex justify-between items-center">
+        <!-- Logo and Links -->
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-3xl font-bold">UWI Competitions Platform</a>
+          <div class="hidden md:flex space-x-6">
+            <a href="/leaderboard" class="hover:bg-[#034c5f] p-2 rounded-md">Leaderboard</a>
+            <a href="/competitions" class="hover:bg-[#034c5f] p-2 rounded-md">Competitions</a>
           </div>
-          <div class="flex space-x-6">
-            {% if user.is_authenticated %}
-            <a href="/profile">
+        </div>
+
+        <!-- Profile and Auth Links -->
+        <div class="flex items-center space-x-4">
+          {% if user.is_authenticated %}
+            <!-- Profile Dropdown -->
+            <div class="relative group">
               <img
                 src="{{url_for('static', filename='defaultProfilePicture.png')}}"
-                alt=""
-                class="h-[64px] w-[64px] align-middle rounded-full"
+                alt="Profile Picture"
+                class="h-12 w-12 rounded-full cursor-pointer"
               />
-            </a>
-            {% else %}
-            <div><a href="/signup">Sign Up</a></div>
-            <div><a href="/login">Log In</a></div>
-            {% endif %}
-          </div>
+              <div class="absolute right-0 hidden bg-white text-black text-sm rounded-lg shadow-md group-hover:block">
+                <a href="/profile" class="block px-4 py-2">Profile</a>
+                <a href="/logout" class="block px-4 py-2">Sign Out</a>
+              </div>
+            </div>
+          {% else %}
+            <a href="/signup" class="text-lg">Sign Up</a>
+            <a href="/login" class="text-lg">Log In</a>
+          {% endif %}
         </div>
       </div>
     </div>
 
-    {% block content %}{% endblock %}
+    <div class="bg-[#003554] min-h-screen">
+      {% block content %}{% endblock %}
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="{{url_for('static', filename='main.js')}}"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
   </body>
 </html>

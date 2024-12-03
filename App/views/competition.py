@@ -9,6 +9,8 @@ from App.controllers import *
 from App.controllers.commands import *
 from App.models import *
 
+
+command_invoker = CommandInvoker()
 comp_views = Blueprint('comp_views', __name__, template_folder='../templates')
 
 ##return the json list of competitions fetched from the db
@@ -178,10 +180,9 @@ def confirm_results(comp_name):
         moderator = None
     
     competition = get_competition_by_name(comp_name)
-
-    if update_ratings(moderator.username, competition.name):
-        update_rankings()
-
+    command_invoker.set_on_start(UpdateRating(competition.name))
+    command_invoker.set_on_finish(UpdateRank())
+    command_invoker.execute_command()
     leaderboard = display_competition_results(comp_name)
 
     return render_template('competition_details.html', competition=competition, moderator=moderator, leaderboard=leaderboard, user=current_user)
