@@ -1,3 +1,4 @@
+'''
 import time
 import random
 from locust import HttpUser, task, between
@@ -27,3 +28,5 @@ class WebsiteUser(HttpUser):
     def competition_details_page(self):
         competition_id = random.randint(1, 6)
         self.client.get(url=f"/competitions/{competition_id}")
+
+'''

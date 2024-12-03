@@ -177,6 +177,9 @@ def display_notifications_command(username):
 app.cli.add_command(student_cli)
 
 
+@student_cli.command("ranking", help="Lists rankings in the database")
+def display_all_rankings():
+    print(display_rankings())
 '''
 Moderator Commands
 '''
@@ -244,6 +247,7 @@ def list_moderators_command(format):
         print(get_all_moderators_json())
 
 app.cli.add_command(mod_cli)
+
 
 
 '''

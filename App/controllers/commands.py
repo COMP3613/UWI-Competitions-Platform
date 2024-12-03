@@ -79,4 +79,18 @@ class AddCompetition(Command):
                 return None
         else:
             print("Invalid credentials!")
-    
+
+class AddResults(Command):
+    def __init__(self, mod_name, comp_name, team_name, students, score):
+        self.mod_name = mod_name
+        self.comp_name = comp_name
+        self.team_name = team_name
+        self.students = students
+        self.score = score
+
+    def execute(self):
+        comp = add_team(self.mod_name, self.comp_name, self.team_name, self.students)
+        if comp:
+            add_results(self.mod_name, self.comp_name, self.team_name, self.score)
+        else:
+            print('\nNot comp object\n')
