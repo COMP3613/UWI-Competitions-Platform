@@ -200,7 +200,10 @@ def get_competitions_postman():
 @comp_views.route('/createcompetition_postman', methods=['POST'])
 def create_comp_postman():
     data = request.json
-    response = create_competition('robert', data['name'], data['date'], data['location'], data['level'], data['max_score'])
+
+    command_invoker.set_on_start(AddCompetition('robert', data['name'], data['date'], data['location'], data['level'], data['max_score']))
+    command_invoker.execute_command()
+    response = Competition.query.filter_by(name= data['name']).first()
     if response:
         return (jsonify({'message': "Competition created!"}), 201)
     return (jsonify({'error': "Error creating competition"}),500)

@@ -205,13 +205,19 @@ def profile():
 def student_profile(id):
     student = get_student(id)
     if not student:
-        return render_template('student_profile.html', student=None, competitions=None, user=current_user,
-                               historical_data=None, id=id)
-
-    history = get_historical_ranking(student)
+        return render_template('404.html')
     profile_info = display_student_info(student.username)
-    competitions = profile_info['competitions']
-
+    competitionsQuery = profile_info['competitions']
+    competitions = []
+    for competition in competitionsQuery:
+        comp = get_competition_by_name(competition)
+        print(comp)
+        competitions.append({
+            "name": comp.name,
+            "date": comp.date,
+            "id": comp.id
+        })
+    history = get_historical_ranking(student)
     """
     competitions = Competition.query.filter(Competition.participants.any(id=user_id)).all()
     ranking = Ranking.query.filter_by(student_id=user_id).first()
