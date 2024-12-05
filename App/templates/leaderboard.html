@@ -50,7 +50,7 @@ page %}UWI Competitions Platform{% endblock %} {{ super() }} {% block content %}
             <div class="flex flex-col md:flex-row md:space-x-4">
                 <div class="flex flex-row items-center justify-center md:justify-start space-x-4 mb-4 md:mb-0">
                     <div class="flex items-center justify-center h-16 w-16  rounded-full text-white bg-[#395176] text-lg font-bold">
-                        #1
+                        #{{leaderboard[0]['placement']}}
                     </div>
                     <div class="flex flex-col items-center justify-between h-52">
                         <img src="{{url_for('static', filename='defaultProfilePicture.png')}}"
@@ -157,8 +157,10 @@ page %}UWI Competitions Platform{% endblock %} {{ super() }} {% block content %}
 <script>
     let data = [];
     document.addEventListener("DOMContentLoaded", function() {
-      const now = new Date();
-      const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const now = new Date();
+
+    const formattedDate = `${now.getUTCDate().toString().padStart(2, '0')}/${(now.getUTCMonth() + 1).toString().padStart(2, '0')}/${now.getUTCFullYear()}`;
+
       data = [
         {% for entry in leaderboard[0]['history'] %}
           {
