@@ -328,8 +328,10 @@
             <script>
                 let data = [];
                 document.addEventListener("DOMContentLoaded", function() {
-                  const now = new Date();
-                  const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+                const now = new Date();
+
+                const formattedDate = `${now.getUTCDate().toString().padStart(2, '0')}/${(now.getUTCMonth() + 1).toString().padStart(2, '0')}/${now.getUTCFullYear()}`;
+
                   data = [
                     {% for entry in history %}
                       {

@@ -25,7 +25,7 @@ def get_student_by_username(username):
 
 
 def get_student(id):
-    return Student.query.get(id)
+    return Student.query.filter_by(id=id).first()
 
 
 def get_all_students():
