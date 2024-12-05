@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, session
+from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, session, url_for
 from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import login_required, login_user, current_user, logout_user
 from App.models import db
@@ -193,33 +193,40 @@ def profile():
     id = current_user.get_id()
 
     if user_type == 'moderator':
-        template = moderator_profile(id)
+        return redirect(url_for('index_views.moderator_profile', id=id))
 
     if user_type == 'student':
-        template = student_profile(id)
+        return redirect(url_for('index_views.student_profile', id=id))
 
-    return template
+    return render_template('404.html')
 
 
 @index_views.route('/student_profile/<int:id>', methods=['GET'])
 def student_profile(id):
     student = get_student(id)
     if not student:
-        return render_template('student_profile.html', student=None, competitions=None, user=current_user,
-                               historical_data=None, id=id)
+        return render_template("404.html")
 
     history = get_historical_ranking(student)
     profile_info = display_student_info(student.username)
-    competitions = profile_info['competitions']
-
+    competitionsQuery = profile_info['competitions']
+    competitions = []
+    for competition in competitionsQuery:
+        comp = get_competition_by_name(competition)
+        print(comp.name)
+        competitions.append({
+            "name": comp.name,
+            "date": comp.date,
+            "id": comp.id
+        })
+    print(history)
     """
     competitions = Competition.query.filter(Competition.participants.any(id=user_id)).all()
     ranking = Ranking.query.filter_by(student_id=user_id).first()
     notifications= get_notifications(user.username)
     """
 
-    return render_template('student_profile.html', student=student, competitions=competitions, user=current_user,
-                           historical_data=history)
+    return render_template('student_profile.html', student=student, competitions=competitions, user=current_user, history=history)
 
 
 @index_views.route('/student_profile/<string:name>', methods=['GET'])
