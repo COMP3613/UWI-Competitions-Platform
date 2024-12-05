@@ -213,13 +213,12 @@ def student_profile(id):
     competitions = []
     for competition in competitionsQuery:
         comp = get_competition_by_name(competition)
-        print(comp.name)
         competitions.append({
             "name": comp.name,
             "date": comp.date,
             "id": comp.id
         })
-    print(history)
+    history = get_historical_ranking(student)
     """
     competitions = Competition.query.filter(Competition.participants.any(id=user_id)).all()
     ranking = Ranking.query.filter_by(student_id=user_id).first()

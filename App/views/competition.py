@@ -43,9 +43,8 @@ def create_comp():
     date = data['date']
     date = date[8] + date[9] + '-' + date[5] + date[6] + '-' + date[0] + date[1] + date[2] + date[3]
     
-    invoker = CommandInvoker()
-    invoker.set_on_start(AddCompetition(moderator.username, data['name'], date, data['location'], data['level'], data['max_score']))
-    invoker.execute_command()
+    command_invoker.set_on_start(AddCompetition(moderator.username, data['name'], date, data['location'], data['level'], data['max_score']))
+    command_invoker.execute_command()
 
     return render_template('competitions.html', competitions=get_all_competitions(), user=current_user)
     #return (jsonify({'message': "Competition created!"}), 201)
@@ -159,10 +158,13 @@ def add_competition_results(comp_name):
     data = request.form
     
     students = [data['student1'], data['student2'], data['student3']]
-    response = add_team(moderator.username, comp_name, data['team_name'], students)
+  #  response = add_team(moderator.username, comp_name, data['team_name'], students)
 
-    if response:
-        response = add_results(moderator.username, comp_name, data['team_name'], int(data['score']))
+    command_invoker.set_on_start(AddResults(moderator.username, comp_name, data['team_name'], students, int(data['score'])))
+    command_invoker.execute_command()
+
+#    if response:
+    #response = add_results(moderator.username, comp_name, data['team_name'], int(data['score']))
     #response = add_results(data['mod_name'], data['comp_name'], data['team_name'], int(data['score']))
     #if response:
     #    return (jsonify({'message': "Results added successfully!"}),201)
@@ -200,7 +202,10 @@ def get_competitions_postman():
 @comp_views.route('/createcompetition_postman', methods=['POST'])
 def create_comp_postman():
     data = request.json
-    response = create_competition('robert', data['name'], data['date'], data['location'], data['level'], data['max_score'])
+
+    command_invoker.set_on_start(AddCompetition('robert', data['name'], data['date'], data['location'], data['level'], data['max_score']))
+    command_invoker.execute_command()
+    response = Competition.query.filter_by(name= data['name']).first()
     if response:
         return (jsonify({'message': "Competition created!"}), 201)
     return (jsonify({'error': "Error creating competition"}),500)
